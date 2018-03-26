@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{3ABB76FB-9E68-496A-9258-8109F683A0C0}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Dlzyff.BoardGameServer.View</RootNamespace>
+    <AssemblyName>Dlzyff.BoardGameServer.View</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BoardGameServerView.cs" />
+    <Compile Include="Centers\NetMessageCenter.cs" />
+    <Compile Include="GameServer.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Dlzyff.BoardGame.BottomServer\Dlzyff.BoardGame.BottomServer.csproj">
+      <Project>{11935fbd-7c9d-4e4d-aca2-1bf1f8a03e88}</Project>
+      <Name>Dlzyff.BoardGame.BottomServer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Dlzyff.BoardGame.Protocol\Dlzyff.BoardGame.Protocol.csproj">
+      <Project>{15620777-0d75-4a37-b708-6867817f6bf1}</Project>
+      <Name>Dlzyff.BoardGame.Protocol</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Dlzyff.BoardGameServer.LogicHandle\Dlzyff.BoardGameServer.LogicHandle.csproj">
+      <Project>{151DD6C8-093D-4F07-B15B-77A84EA72A93}</Project>
+      <Name>Dlzyff.BoardGameServer.LogicHandle</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Dlzyff.BoardGameServer.Model\Dlzyff.BoardGameServer.Model.csproj">
+      <Project>{d1ad39c4-63f0-419a-9edc-06eb20f8f07c}</Project>
+      <Name>Dlzyff.BoardGameServer.Model</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
