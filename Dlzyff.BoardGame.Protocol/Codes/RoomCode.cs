@@ -41,9 +41,19 @@
         Userready_Request,
 
         /// <summary>
+        ///     玩家准备的响应码
+        /// </summary>
+        Userready_Response,
+
+        /// <summary>
         ///    玩家取消准备的请求码
         /// </summary>
         UserCancelready_Request,
+
+        /// <summary>
+        ///     玩家取消准备的响应码
+        /// </summary>
+        UserCancelready_Response,
 
         /// <summary>
         ///  开始游戏的请求码

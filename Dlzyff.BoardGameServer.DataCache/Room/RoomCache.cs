@@ -18,7 +18,7 @@ namespace Dlzyff.BoardGameServer.DataCache.Room
         /// <summary>
         /// 房间内的最大玩家数
         /// </summary>
-        public const int MAX_PERSON_NUMBER = 4; 
+        public const int MAX_PERSON_NUMBER = 4;
         #endregion
 
         #region 成员变量
@@ -30,7 +30,7 @@ namespace Dlzyff.BoardGameServer.DataCache.Room
         /// <summary>
         /// 随机的房间进入码
         /// </summary>
-        private Random ranRandomEnterCode = new Random(0); 
+        private Random ranRandomEnterCode = new Random(0);
         #endregion
 
         #region 字段
@@ -48,11 +48,6 @@ namespace Dlzyff.BoardGameServer.DataCache.Room
         /// 房间数据实体模型对应的房间内的准备的玩家对象的数据字典
         /// </summary>
         private Dictionary<RoomInfo, Dictionary<ClientPeer, bool>> _roomReadyClientDict = null;
-
-        /// <summary>
-        /// 房间内准备的玩家的数据字典
-        /// </summary>
-        private Dictionary<ClientPeer, bool> _readyClientDict = null;
 
         /// <summary>
         /// 存储所有房间信息数据的列表
@@ -139,10 +134,9 @@ namespace Dlzyff.BoardGameServer.DataCache.Room
 
         public RoomCache()
         {
-            this._roomIdRooms = new Dictionary<int, RoomInfo>();
-            this._roomClientDict = new Dictionary<RoomInfo, List<ClientPeer>>();
+            this.RoomIdRooms = new Dictionary<int, RoomInfo>();
+            this.RoomClientsDict = new Dictionary<RoomInfo, List<ClientPeer>>();
             this.RoomReadyClientDict = new Dictionary<RoomInfo, Dictionary<ClientPeer, bool>>();
-            this._readyClientDict = new Dictionary<ClientPeer, bool>();
         }
 
         #region 创建
@@ -174,7 +168,7 @@ namespace Dlzyff.BoardGameServer.DataCache.Room
             catch (Exception ex)
             {
                 //LogMessage.Instance.SetLogMessage(ex.StackTrace);
-                //  System.Console.WriteLine(ex.StackTrace);
+                System.Console.WriteLine(ex.StackTrace);
             }
 
             return room;
@@ -192,9 +186,8 @@ namespace Dlzyff.BoardGameServer.DataCache.Room
         {
             //这儿后期需要修改至根据客户端要指定加入的房间进行房间数据的获取处理
             //而不是默认为0的房间
-            RoomInfo tmpRoomInfo = this._roomIdRooms[roomId];
-            Join(clientPeer, roomId, tmpRoomInfo);
-
+            RoomInfo tmpRoomInfo = this.RoomIdRooms[roomId];
+            this.Join(clientPeer, roomId, tmpRoomInfo);
             return tmpRoomInfo;
         }
 
@@ -257,7 +250,7 @@ namespace Dlzyff.BoardGameServer.DataCache.Room
         public RoomInfo LeaveRoom(ClientPeer clientPeer, int roomId)
         {
             //离开的时候需要把客户端用户从房间内移除
-            List<UserInfo> userInfos = this._roomIdRooms[roomId].UserInfos;
+            List<UserInfo> userInfos = this.RoomIdRooms[roomId].UserInfos;
             try
             {
                 for (int userIndex = 0; userIndex < userInfos.Count; userIndex++)
@@ -268,8 +261,8 @@ namespace Dlzyff.BoardGameServer.DataCache.Room
                         break;
                     }
                 }
-                this._roomClientDict[this._roomIdRooms[roomId]].Remove(clientPeer);//从房间客户端对象中移除指定客户端连接对象
-                this._roomIdRooms[roomId].PersonNumber--;//离开房间以后需要将人数减少1
+                this.RoomClientsDict[this.RoomIdRooms[roomId]].Remove(clientPeer);//从房间客户端对象中移除指定客户端连接对象
+                this.RoomIdRooms[roomId].PersonNumber--;//离开房间以后需要将人数减少1
                 LogMessage.Instance.SetLogMessage(clientPeer.ClientSocket.RemoteEndPoint.ToString() + " 离开了 [ " + roomId + " ] 房间~");
             }
             catch
@@ -287,16 +280,16 @@ namespace Dlzyff.BoardGameServer.DataCache.Room
         /// <param name="roomId">玩家所在房间</param>
         public void Ready(ClientPeer clientPeer, int roomId)
         {
-            if (!this.RoomReadyClientDict.ContainsKey(this.GetRoomInfoByRoomId(roomId)))
+            if (!this.RoomReadyClientDict.ContainsKey(this.GetRoomInfoByRoomId(roomId)))//如果房间准备玩家数据字典中不存在房间这个键的情况
             {
-                this.RoomReadyClientDict.Add(this.GetRoomInfoByRoomId(roomId), this._readyClientDict);
-                this.RoomReadyClientDict[this.GetRoomInfoByRoomId(roomId)].Add(clientPeer, true);
-                LogMessage.Instance.SetLogMessage("玩家 [" + clientPeer.ClientSocket.RemoteEndPoint.ToString() + "] 在房间编号为 [" + roomId + "] 进行了准备~");
+                this.RoomReadyClientDict.Add(this.GetRoomInfoByRoomId(roomId), new Dictionary<ClientPeer, bool>());//不存在的情况下 构造一个新的数据并存储下来
+                this.RoomReadyClientDict[this.GetRoomInfoByRoomId(roomId)].Add(clientPeer, true);//给这个新构建好的数据 添加进一个房间内要准备的玩家对象 和 该玩家对象的准备标志位
+                LogMessage.Instance.SetLogMessage("玩家 [" + clientPeer.ClientSocket.RemoteEndPoint.ToString() + "] 在房间编号为 [" + roomId + "] 进行了准备~");//添加完成 显示出来
             }
-            else
+            else//否则房间准备玩家的数据字典中存在房间这个键的情况
             {
-                this.RoomReadyClientDict[this.GetRoomInfoByRoomId(roomId)].Add(clientPeer, true);
-                LogMessage.Instance.SetLogMessage("玩家 [" + clientPeer.ClientSocket.RemoteEndPoint.ToString() + "] 在房间编号为 [" + roomId + "] 进行了准备~");
+                this.RoomReadyClientDict[this.GetRoomInfoByRoomId(roomId)].Add(clientPeer, true);//给这个已经存在的数据 添加一个房间内要准备的玩家对象 和 该玩家对象的准备标志位
+                LogMessage.Instance.SetLogMessage("玩家 [" + clientPeer.ClientSocket.RemoteEndPoint.ToString() + "] 在房间编号为 [" + roomId + "] 进行了准备~");//添加完成 显示出来
             }
         }
         #endregion
@@ -309,12 +302,12 @@ namespace Dlzyff.BoardGameServer.DataCache.Room
         /// <param name="roomId">玩家所在的房间</param>
         public void CancelReady(ClientPeer clientPeer, int roomId)
         {
-            if (this.RoomReadyClientDict.ContainsKey(this.GetRoomInfoByRoomId(roomId)))
+            if (this.RoomReadyClientDict.ContainsKey(this.GetRoomInfoByRoomId(roomId)))//如果房间准备玩家的数据字典中存在房间这个键的情况
             {
-                this.RoomReadyClientDict[this.GetRoomInfoByRoomId(roomId)][clientPeer] = false;
+                this.RoomReadyClientDict[this.GetRoomInfoByRoomId(roomId)][clientPeer] = false;//给这个已经存在的数据 修改一个房间内要准备的玩家对象的准备标志位
                 LogMessage.Instance.SetLogMessage("玩家 [" + clientPeer.ClientSocket.RemoteEndPoint.ToString() + "] 在房间编号为 [" + roomId + "] 取消了准备~");
             }
-            else
+            else//如果不存在 直接不做任何处理 做return 操作
                 return;
         }
         #endregion
@@ -407,10 +400,18 @@ namespace Dlzyff.BoardGameServer.DataCache.Room
         {
             //在解散房间的时候 需要把和这个房间编号有关的数据结构中的数据进行移除处理
             RoomInfo roomInfo = this.RoomIdRooms[roomId];
-            this.RoomClientsDict.Remove(roomInfo);
-            this.RoomReadyClientDict.Remove(roomInfo);
-            this.Rooms.Remove(roomInfo);
-            this.RoomIdRooms.Remove(roomId);
+            if (roomInfo != null)
+            {
+                this.RoomClientsDict.Remove(roomInfo);//从房间客户端数据字典中移除指定房间数据
+                this.RoomReadyClientDict.Remove(roomInfo);//从房间准备玩家数据字典中移除指定房间数据
+                this.Rooms.Remove(roomInfo);//从房间列表中移除指定房间数据
+                this.RoomIdRooms.Remove(roomId);
+            }
+            else
+            {
+                LogMessage.Instance.SetLogMessage("解散房间编号为 [ " + roomId.ToString() + " ] 的房间失败~");
+                return;
+            }
         }
         #endregion
 

@@ -32,6 +32,18 @@
             get { return this._accountPassword; }
             set { this._accountPassword = value; }
         }
+
+        public AccountInfo() { }
+
+        /// <summary>
+        /// 带参的构造方法
+        /// </summary>
+        /// <param name="accountName"></param>
+        /// <param name="accountPassword"></param>
+        public AccountInfo(string accountName, string accountPassword) {
+            this.AccountUsername = accountName;
+            this.AccountPassword = accountPassword;
+        }
       
     }
 }

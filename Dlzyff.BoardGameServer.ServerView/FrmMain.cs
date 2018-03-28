@@ -1,8 +1,11 @@
 ﻿using Dlzyff.BoardGame.BottomServer.Applications;
 using Dlzyff.BoardGame.BottomServer.Peers;
+using Dlzyff.BoardGameServer.Dao.Tools;
 using Dlzyff.BoardGameServer.Log;
 using Dlzyff.BoardGameServer.ServerView.Centers;
 using System;
+using System.Diagnostics;
+using System.Reflection;
 using System.Windows.Forms;
 
 namespace Dlzyff.BoardGameServer.ServerView
@@ -49,6 +52,7 @@ namespace Dlzyff.BoardGameServer.ServerView
         {
             this.serverPeer.SetApplication(this.netMsgCenterApp);
             this.serverPeer.StartServer(6666, 10);
+            BroadgameDBTool.SetConnectStr("这儿填写数据库连接字符串");//可以从配置文件中读取数据库连接字符串
             this.logMessageList.Items.Add("服务器启动成功~");
             this.logMessageList.Items.Add("等待客户端对象的连接~");
             this.btnStartServer.Enabled = false;
@@ -61,14 +65,14 @@ namespace Dlzyff.BoardGameServer.ServerView
         /// <param name="e"></param>
         private void BtnCloseServer_Click(object sender, EventArgs e)
         {
-            #region 测试代码
-            //this.serverPeer.Close();
-            //Thread.Sleep(1000);//睡1.5s关闭服务端程序
-            //Application.Exit(); 
-            #endregion
-            //  this.serverPeer.Close();
-            this.btnStartServer.Enabled = true;
-            this.btnCloseServer.Enabled = false;
+            if (MessageBox.Show("要重新启动嘛？", "提示", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                this.serverPeer.Close();
+                Application.Exit();
+                Process.Start(Assembly.GetExecutingAssembly().Location);
+                this.StartPosition = FormStartPosition.WindowsDefaultLocation;
+
+            }
         }
     }
 }

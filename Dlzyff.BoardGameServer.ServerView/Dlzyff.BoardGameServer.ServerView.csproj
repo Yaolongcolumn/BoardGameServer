@@ -93,6 +93,10 @@
       <Project>{15620777-0D75-4A37-B708-6867817F6BF1}</Project>
       <Name>Dlzyff.BoardGame.Protocol</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Dlzyff.BoardGameServer.Dao\Dlzyff.BoardGameServer.Dao.csproj">
+      <Project>{dfd726d3-146f-4fb0-9cc1-d142728672a8}</Project>
+      <Name>Dlzyff.BoardGameServer.Dao</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Dlzyff.BoardGameServer.LogicHandle\Dlzyff.BoardGameServer.LogicHandle.csproj">
       <Project>{151DD6C8-093D-4F07-B15B-77A84EA72A93}</Project>
       <Name>Dlzyff.BoardGameServer.LogicHandle</Name>

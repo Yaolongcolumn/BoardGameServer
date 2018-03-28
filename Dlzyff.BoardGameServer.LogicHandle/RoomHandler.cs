@@ -96,9 +96,6 @@ namespace Dlzyff.BoardGameServer.LogicHandle
                                             this.ProcessJoinRoomRequestByRoomEnterCode(clientPeer, roomEnterCode);//加入房间
                                     }
                                     break;
-                                default:
-                                    this.ProcessJoinRoomRequest(clientPeer);//默认加入房间即可(这里加入的就是第一个创建的房间)
-                                    break;
                             }
                         }
                         catch (Exception ex)
@@ -270,26 +267,32 @@ namespace Dlzyff.BoardGameServer.LogicHandle
                     case GameServiceTypeCode.PasseService://帕斯业务初始发牌处理阶段
                         {
                             /*
-                                这里处理帕斯游戏的初始发牌过程
-                             */
+                                    这里处理帕斯游戏的初始发牌过程
+                                */
                             this.passeServiceCache.InitCardsData();//通过帕斯业务数据缓存对象初始化卡牌数据
                             this.passeServiceCache.ResetCards();//通过帕斯业务数据缓存对象重置卡牌数据
+                            /*
+                                    这里处理将客户端对象存储起来
+                                */
                             this.passeServiceCache.AddClientPeer(clientPeer);//将客户端连接对象存储起来
+                            /*
+                                    这里处理将房间信息存储起来
+                                */
                             this.passeServiceCache.AddRoomInfo(newRoom);//将新创建好的房间存储起来
                         }
                         break;
                     case GameServiceTypeCode.FivebombsWithSixbombsService://五轰六炸业务初始发牌处理阶段
                         {
                             /*
-                                这里处理五轰六炸游戏的初始发牌过程
-                            */
+                                    这里处理五轰六炸游戏的初始发牌过程
+                                */
                         }
                         break;
                     case GameServiceTypeCode.MahjongService://麻将业务初始发牌处理阶段
                         {
                             /*
-                                这里处理麻将游戏的初始发牌过程
-                            */
+                                    这里处理麻将游戏的初始发牌过程
+                                */
                         }
                         break;
                 }
@@ -383,13 +386,13 @@ namespace Dlzyff.BoardGameServer.LogicHandle
                     Money = 5000,
                     ClientUserSocket = clientPeer.ClientSocket,
                     ClientIndex = this.roomCache.GetRoomClientIndexByRoomId(clientPeer, roomInfo.Id)
-                }; 
-                #endregion
+                };
 
                 this.userCache.AddUser(clientPeer, userInfo);//将创建好的用户数据保存起来
                 userInfo.Id = this.userCache.GetUserIdByUserInfo(userInfo);//设置用户唯一编号
 
                 roomInfo.UserInfos.Add(userInfo);//将用户存储添加到房间内
+                #endregion
 
                 this.passeServiceCache.ChangeRoomUserScoresDictionaryByRoomId(roomInfo.Id, userInfo);//将用户存储起来
 
@@ -453,7 +456,7 @@ namespace Dlzyff.BoardGameServer.LogicHandle
                 #region 给房主广播一条空数据(没有实际作用,只是为了房主的数据同步工作,不会影响其他客户端对象)
                 RoomInfo tmpRoomInfo = this.roomCache.RoomIdRooms[tmpRoom.Id];//获取房间信息对象
                 List<ClientPeer> clients = this.roomCache.RoomClientsDict[tmpRoomInfo];//通过房间信息对象获取该房间内的客户端用户列表
-                if (clients != null)//如果不为空的情况下
+                if (clients != null)//如果不为空的情况下     
                     //默认给房主发送一个null数据(之前不这样做,会导致房主的数据不进行同步处理,出现了Bug,之后这样做,竟然神奇地解决了)
                     clients[0].OnSendMessage(
                         new SocketMessage()
@@ -503,7 +506,7 @@ namespace Dlzyff.BoardGameServer.LogicHandle
         /// <param name="roomId"></param>
         private void ProcessUserreadyRequest(ClientPeer clientPeer, int roomId)
         {
-            this.roomCache.Ready(clientPeer, roomId);
+            this.roomCache.Ready(clientPeer, roomId);//使用房间数据缓存对象进行指定房间内的玩家准备
         }
         #endregion
 

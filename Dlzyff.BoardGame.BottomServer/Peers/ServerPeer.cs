@@ -81,6 +81,20 @@ namespace Dlzyff.BoardGame.BottomServer.Peers
             }
         }
 
+        public void ResetServer(int portNumber)
+        {
+            try
+            {
+                this.serverSocket.Bind(new IPEndPoint(IPAddress.Any, portNumber));
+                this.serverSocket.Listen(10);
+                this.StartAccept(null);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
         #endregion
 
         #region 接收连接请求
@@ -96,6 +110,8 @@ namespace Dlzyff.BoardGame.BottomServer.Peers
                 eventArgs = new SocketAsyncEventArgs();
                 eventArgs.Completed += this.ClientAcceptEventCompleted;//注册建立连接完成时的事件函数
             }
+            //if (this.serverSocket == null)
+            //    return;
             bool result = this.serverSocket.AcceptAsync(eventArgs);//开启异步连接
             if (result == false)
                 this.ProcessAccept(eventArgs);
@@ -256,8 +272,13 @@ namespace Dlzyff.BoardGame.BottomServer.Peers
         public void Close()
         {
             this.application = null;
-            this.serverSocket.Close();
-          //  this.acceptSemaphore.Close();
+            if (this.serverSocket != null && this.serverSocket.Connected == true)
+            {
+                this.serverSocket.Shutdown(SocketShutdown.Both);
+                this.serverSocket.Close();
+                this.serverSocket.Disconnect(true);
+                this.acceptSemaphore.Dispose();
+            }
         }
         #endregion
     }

@@ -4,20 +4,19 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{15620777-0D75-4A37-B708-6867817F6BF1}</ProjectGuid>
+    <ProjectGuid>{DFD726D3-146F-4FB0-9CC1-D142728672A8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Dlzyff.BoardGame.Protocol</RootNamespace>
-    <AssemblyName>Dlzyff.BoardGame.Protocol</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <RootNamespace>Dlzyff.BoardGameServer.Dao</RootNamespace>
+    <AssemblyName>Dlzyff.BoardGameServer.Dao</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\..\..\SVNWorkspace\棋牌客户端源码\Assets\Plugins\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -41,27 +40,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ActionCode.cs" />
-    <Compile Include="Codes\AccountCode.cs" />
-    <Compile Include="Codes\GameCode\GameResultCode.cs" />
-    <Compile Include="Codes\GameCode\GameServiceTypeCode.cs" />
-    <Compile Include="Codes\GameCode\PasseGameCode.cs" />
-    <Compile Include="Codes\OperationCode.cs" />
-    <Compile Include="Codes\RoomCode.cs" />
-    <Compile Include="Codes\UserCode.cs" />
-    <Compile Include="Dto\AccountDto.cs" />
-    <Compile Include="Dto\RoomInfoDto.cs" />
-    <Compile Include="Dto\ServiceDto\BaseServiceDto.cs" />
-    <Compile Include="Dto\ServiceDto\PasseServiceDto.cs" />
-    <Compile Include="Dto\UserInfoDto.cs" />
+    <Compile Include="AccountInfoDao.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RequestCode.cs" />
-    <Compile Include="ResponseCode.cs" />
-    <Compile Include="Codes\ServiceCode.cs" />
+    <Compile Include="Tables.cs" />
+    <Compile Include="Tools\BroadgameDBTool.cs" />
+    <Compile Include="UserInfoDao.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Dlzyff.BoardGameServer.Log\Dlzyff.BoardGameServer.Log.csproj">
+      <Project>{CE962DBC-EB4D-4083-BFAA-A8FE0DD5A969}</Project>
+      <Name>Dlzyff.BoardGameServer.Log</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Dlzyff.BoardGameServer.Model\Dlzyff.BoardGameServer.Model.csproj">
-      <Project>{d1ad39c4-63f0-419a-9edc-06eb20f8f07c}</Project>
+      <Project>{D1AD39C4-63F0-419A-9EDC-06EB20F8F07C}</Project>
       <Name>Dlzyff.BoardGameServer.Model</Name>
     </ProjectReference>
   </ItemGroup>

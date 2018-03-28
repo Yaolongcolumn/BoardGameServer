@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dlzyff.BoardGameServer.Log"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dlzyff.BoardGameServer.UnitTest", "Dlzyff.BoardGameServer.UnitTest\Dlzyff.BoardGameServer.UnitTest.csproj", "{FABA36C1-6766-4F98-97BE-3CC305508D65}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dlzyff.BoardGameServer.Dao", "Dlzyff.BoardGameServer.Dao\Dlzyff.BoardGameServer.Dao.csproj", "{DFD726D3-146F-4FB0-9CC1-D142728672A8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,8 +65,15 @@ Global
 		{FABA36C1-6766-4F98-97BE-3CC305508D65}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FABA36C1-6766-4F98-97BE-3CC305508D65}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FABA36C1-6766-4F98-97BE-3CC305508D65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFD726D3-146F-4FB0-9CC1-D142728672A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFD726D3-146F-4FB0-9CC1-D142728672A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFD726D3-146F-4FB0-9CC1-D142728672A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFD726D3-146F-4FB0-9CC1-D142728672A8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E2756BC6-6383-40B1-8755-2F98FD1F66C8}
 	EndGlobalSection
 EndGlobal

@@ -9,6 +9,7 @@ namespace Dlzyff.BoardGameServer.Model
     {
         private int _id;
         private string _userName;
+        private string _headImgName;
         private int _winCount;
         private int _loseCount;
         private int _runCount;
@@ -37,7 +38,16 @@ namespace Dlzyff.BoardGameServer.Model
         }
 
         /// <summary>
-        /// 用户胜利场次
+        /// 头像名称
+        /// </summary>
+        public string HeadImgName
+        {
+            get { return this._headImgName; }
+            set { this._headImgName = value; }
+        }
+
+        /// <summary>
+        /// 胜利场次
         /// </summary>
         public int WinCount
         {
@@ -46,7 +56,7 @@ namespace Dlzyff.BoardGameServer.Model
         }
 
         /// <summary>
-        /// 用户失败场次
+        /// 失败场次
         /// </summary>
         public int LoseCount
         {
@@ -55,7 +65,7 @@ namespace Dlzyff.BoardGameServer.Model
         }
 
         /// <summary>
-        /// 用户逃跑场次
+        /// 逃跑场次
         /// </summary>
         public int RunCount
         {
@@ -64,7 +74,7 @@ namespace Dlzyff.BoardGameServer.Model
         }
 
         /// <summary>
-        /// 用户等级
+        /// 等级
         /// </summary>
         public int Level
         {
@@ -73,7 +83,7 @@ namespace Dlzyff.BoardGameServer.Model
         }
 
         /// <summary>
-        /// 用户经验值
+        /// 经验值
         /// </summary>
         public int ExpValue
         {
@@ -82,7 +92,7 @@ namespace Dlzyff.BoardGameServer.Model
         }
 
         /// <summary>
-        /// 用户钱数
+        /// 钱数
         /// </summary>
         public int Money {
             get { return this._money; }
@@ -90,7 +100,7 @@ namespace Dlzyff.BoardGameServer.Model
         }
 
         /// <summary>
-        /// 用户所在房间编号
+        /// 所在房间编号
         /// </summary>
         public int RoomId {
             get { return this._roomId; }
@@ -98,7 +108,7 @@ namespace Dlzyff.BoardGameServer.Model
         }
 
         /// <summary>
-        /// 客户端用户网络连接对象
+        /// 网络连接对象
         /// </summary>
         public Socket ClientUserSocket
         {
@@ -111,7 +121,7 @@ namespace Dlzyff.BoardGameServer.Model
         }
 
         /// <summary>
-        /// 客户端编号
+        /// 编号
         /// </summary>
         public int ClientIndex
         {
