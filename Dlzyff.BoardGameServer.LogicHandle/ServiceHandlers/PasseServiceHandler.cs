@@ -25,7 +25,10 @@ namespace Dlzyff.BoardGameServer.LogicHandle.ServiceHandlers
         private PasseServiceCache passeServiceCache = Caches.PasseServiceCache;
         public void OnDisconnect(ClientPeer clientPeer)
         {
-
+            if (clientPeer!=null)
+            {
+                clientPeer.OnDisconnect();
+            }
         }
 
         public void OnReceiveMessage(ClientPeer clientPeer, int subOperationCode, object dataValue)

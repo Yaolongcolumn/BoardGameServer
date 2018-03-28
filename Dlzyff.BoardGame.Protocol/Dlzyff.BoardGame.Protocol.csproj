@@ -43,8 +43,10 @@
   <ItemGroup>
     <Compile Include="ActionCode.cs" />
     <Compile Include="Codes\AccountCode.cs" />
+    <Compile Include="Codes\GameCode\FivebombsWithSixbombsGameCode.cs" />
     <Compile Include="Codes\GameCode\GameResultCode.cs" />
     <Compile Include="Codes\GameCode\GameServiceTypeCode.cs" />
+    <Compile Include="Codes\GameCode\MahjongGameCode.cs" />
     <Compile Include="Codes\GameCode\PasseGameCode.cs" />
     <Compile Include="Codes\OperationCode.cs" />
     <Compile Include="Codes\RoomCode.cs" />

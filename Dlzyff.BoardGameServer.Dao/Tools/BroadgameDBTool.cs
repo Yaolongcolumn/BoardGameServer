@@ -85,8 +85,8 @@ namespace Dlzyff.BoardGameServer.Dao.Tools
                                                                                                                        //设置参数列表
                             BroadgameDBTool.SetParameterList
                                (
-                                   new SqlParameter() { ParameterName = "@Name", SqlDbType = SqlDbType.NVarChar, Size = 15, Value = accountInfo.AccountUsername },
-                                   new SqlParameter() { ParameterName = "@Password", SqlDbType = SqlDbType.NVarChar, Size = 15, Value = accountInfo.AccountPassword }
+                                   new SqlParameter() { ParameterName = "@Name", SqlDbType = SqlDbType.NVarChar, Size = 15, Value = accountInfo.Name },
+                                   new SqlParameter() { ParameterName = "@Password", SqlDbType = SqlDbType.NVarChar, Size = 15, Value = accountInfo.Password }
                                );
                             BroadgameDBTool.NoramlExecute();//执行普通命令
                         }

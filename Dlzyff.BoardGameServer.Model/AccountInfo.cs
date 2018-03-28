@@ -5,32 +5,32 @@
     /// </summary>
     public class AccountInfo
     {
-        private int _accountId;
-        private string _accountUsername;
-        private string _accountPassword;
+        private int _id;
+        private string _name;
+        private string _password;
         /// <summary>
         /// 账户的唯一编号
         /// </summary>
-        public int AccountId
+        public int Id
         {
-            get { return this._accountId; }
-            set { this._accountId = value; }
+            get { return this._id; }
+            set { this._id = value; }
         }
         /// <summary>
         /// 账户登录时的用户名
         /// </summary>
-        public string AccountUsername
+        public string Name
         {
-            get { return this._accountUsername; }
-            set { this._accountUsername = value; }
+            get { return this._name; }
+            set { this._name = value; }
         }
         /// <summary>
         /// 账户登录时的密码
         /// </summary>
-        public string AccountPassword
+        public string Password
         {
-            get { return this._accountPassword; }
-            set { this._accountPassword = value; }
+            get { return this._password; }
+            set { this._password = value; }
         }
 
         public AccountInfo() { }
@@ -41,8 +41,8 @@
         /// <param name="accountName"></param>
         /// <param name="accountPassword"></param>
         public AccountInfo(string accountName, string accountPassword) {
-            this.AccountUsername = accountName;
-            this.AccountPassword = accountPassword;
+            this.Name = accountName;
+            this.Password = accountPassword;
         }
       
     }

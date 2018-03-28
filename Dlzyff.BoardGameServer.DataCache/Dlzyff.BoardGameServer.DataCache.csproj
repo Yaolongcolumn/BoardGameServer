@@ -43,8 +43,12 @@
     <Compile Include="Caches.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Room\RoomCache.cs" />
+    <Compile Include="Services\BaseServiceCache.cs" />
+    <Compile Include="Services\FivebombsWithSixbombsServiceCache.cs" />
     <Compile Include="Services\IServiceCacheable.cs" />
+    <Compile Include="Services\MahjongServiceCache.cs" />
     <Compile Include="Services\PasseServiceCache.cs" />
+    <Compile Include="Services\PokerServiceCache.cs" />
     <Compile Include="Users\UserCache.cs" />
   </ItemGroup>
   <ItemGroup>

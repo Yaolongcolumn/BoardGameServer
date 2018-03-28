@@ -2,11 +2,8 @@
 using Dlzyff.BoardGame.BottomServer.Tools;
 using Dlzyff.BoardGame.Protocol.Codes;
 using Dlzyff.BoardGame.Protocol.Codes.GameCode;
-using Dlzyff.BoardGameServer.Cache;
-using Dlzyff.BoardGameServer.DataCache.Room;
 using Dlzyff.BoardGameServer.Log;
 using Dlzyff.BoardGameServer.Model;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,47 +13,8 @@ namespace Dlzyff.BoardGameServer.DataCache.Services
     /// <summary>
     /// 帕斯业务缓存类
     /// </summary>
-    public class PasseServiceCache : IServiceCacheable
+    public class PasseServiceCache : PokerServiceCache, IServiceCacheable
     {
-        /// <summary>
-        /// 存储卡牌花色
-        /// </summary>
-        private string[] cardColors = null;
-
-        /// <summary>
-        /// 存储卡牌的值
-        /// </summary>
-        private string[] cardValues = null;
-
-        /// <summary>
-        /// 存储所有卡牌
-        /// </summary>
-        private List<string> allCards = new List<string>();
-
-        /// <summary>
-        /// 存储打乱顺序后的卡牌
-        /// </summary>
-        private List<string> resCards = new List<string>();
-
-        /// <summary>
-        /// 随机卡牌索引对象
-        /// </summary>
-        private Random ranCardIndex = new Random();
-
-        /// <summary>
-        /// 客户端对象 对应的赌注数据字典
-        /// </summary>
-        private Dictionary<ClientPeer, int> clientPourDict = new Dictionary<ClientPeer, int>();
-
-        /// <summary>
-        /// 客户端对象 对应的分数数据字典
-        /// </summary>
-        private Dictionary<ClientPeer, int> clientScoreDict = new Dictionary<ClientPeer, int>();
-
-        /// <summary>
-        /// 用来存储客户端连接对象
-        /// </summary>
-        private List<ClientPeer> clientPeers = new List<ClientPeer>();
 
         /// <summary>
         /// 用来存储一局游戏房间内的客户端用户信息
@@ -68,60 +26,15 @@ namespace Dlzyff.BoardGameServer.DataCache.Services
         /// </summary>
         private Dictionary<RoomInfo, List<ClientPeer>> roomDiscardDict = new Dictionary<RoomInfo, List<ClientPeer>>();
 
-        /// <summary>
-        /// 记录一个房间的游戏局数的数据字典(一次游戏结束后,需要将数据清空)
-        /// </summary>
-        private Dictionary<RoomInfo, int> roomRecordsNumberDict = new Dictionary<RoomInfo, int>();
-
-        /// <summary>
-        /// 房间数据缓存对象
-        /// </summary>
-        private RoomCache roomCache = Caches.RoomCache;
-
         #region 初始化和重置卡牌数据
         /// <summary>
         /// 初始卡牌数据
         /// </summary>
-        public void InitCardsData()
+        public override void InitCardsData()
         {
             this.cardColors = new string[] { "Heart", "Spade", "Square", "Club" };
-            this.cardValues = new string[] { "Nine", "Ten", "Jack", "Queen", "King", "One" }; 
+            this.cardValues = new string[] { "Nine", "Ten", "Jack", "Queen", "King", "One" };
         }
-
-        /// <summary>
-        /// 重置卡牌
-        /// </summary>
-        public void ResetCards()
-        {
-            //生成所有卡牌
-            for (int cardColorIndex = 0; cardColorIndex < this.cardColors.Length; cardColorIndex++)
-            {
-                for (int cardValueIndex = 0; cardValueIndex < this.cardValues.Length; cardValueIndex++)
-                {
-                    string tmpCardValue = this.cardColors[cardColorIndex] + this.cardValues[cardValueIndex];
-                    this.allCards.Add(tmpCardValue);
-                }
-            }
-            //打乱扑克牌
-            int cardCount = this.cardColors.Length * this.cardValues.Length;//取得卡牌的总个数
-            for (int cardIndex = 0; cardIndex < cardCount; cardIndex++)//根据卡牌总个数进行循环遍历处理
-            {
-                int ranIndex = this.ranCardIndex.Next(0, this.allCards.Count);//从所有卡牌中随机取出一个卡牌的索引值
-                this.resCards.Add(this.allCards[ranIndex]);//根据取出的索引值获取对应的数据 添加到存放打乱卡牌的集合中
-                this.allCards.RemoveAt(ranIndex);//取出添加完毕 将数据删除
-            }
-            LogMessage.Instance.SetLogMessage("创建房间后,将一副牌打乱后的结果：");
-            StringBuilder sb = new StringBuilder();
-            string str = string.Empty;
-            foreach (string cardValue in this.resCards)
-            {
-                sb.Append(cardValue + ",\n");
-            }
-            if (sb.Length > 0)
-                str = sb.ToString().Remove(sb.Length - 1, 1);
-            LogMessage.Instance.SetLogMessage(str);
-        }
-
         #endregion
 
         #region 随机获取卡牌数据
@@ -129,36 +42,16 @@ namespace Dlzyff.BoardGameServer.DataCache.Services
         /// 获取随机卡牌
         /// </summary>
         /// <returns></returns>
-        public string GetRandomCard()
+        public override string GetRandomCard()
         {
+            if (this.resCards.Count == 0)
+            {
+                return "没有扑克牌可以抓取了~";
+            }
             int index = this.ranCardIndex.Next(0, this.resCards.Count);
             string cardStr = this.resCards[index];
             this.resCards.RemoveAt(index);
             return cardStr;
-        }
-        #endregion
-
-        #region 增加和移除客户端连接对象
-        /// <summary>
-        /// 添加客户端连接对象
-        /// </summary>
-        /// <param name="clientPeer"></param>
-        public void AddClientPeer(ClientPeer clientPeer)
-        {
-            if (!this.clientPeers.Contains(clientPeer))
-                this.clientPeers.Add(clientPeer);
-            LogMessage.Instance.SetLogMessage("当前客户端用户的个数：" + this.clientPeers.Count.ToString());
-        }
-
-        /// <summary>
-        /// 移除客户端连接对象
-        /// </summary>
-        /// <param name="clientPeer"></param>
-        public void SubClientPeer(ClientPeer clientPeer)
-        {
-            if (this.clientPeers.Contains(clientPeer))
-                this.clientPeers.Remove(clientPeer);//从客户端连接对象列表中移除客户端连接对象
-            LogMessage.Instance.SetLogMessage("当前客户端用户的个数：" + this.clientPeers.Count.ToString());
         }
         #endregion
 
@@ -167,7 +60,7 @@ namespace Dlzyff.BoardGameServer.DataCache.Services
         /// 添加房间信息对象
         /// </summary>
         /// <param name="roomInfo">要添加的房间信息</param>
-        public void AddRoomInfo(RoomInfo roomInfo)
+        public override void AddRoomInfo(RoomInfo roomInfo)
         {
             Dictionary<UserInfo, int> userScoreDict = new Dictionary<UserInfo, int>();//构建一个用于存储用户信息 对应 用户分数的数据字典
             foreach (UserInfo user in roomInfo.UserInfos)//循环遍历房间内的每一个玩家
@@ -179,6 +72,7 @@ namespace Dlzyff.BoardGameServer.DataCache.Services
                 this.roomUserScoreDict.Add(roomInfo, userScoreDict);//将房间和用户信息存储起来;
             else
                 this.roomUserScoreDict[roomInfo] = userScoreDict;
+
         }
 
         /// <summary>
@@ -254,27 +148,6 @@ namespace Dlzyff.BoardGameServer.DataCache.Services
         }
 
         /// <summary>
-        /// 根据房间编号获取房间信息数据
-        /// </summary>
-        /// <param name="roomId"></param>
-        /// <returns></returns>
-        private RoomInfo GetRoomInfoByRoomId(int roomId)
-        {
-            RoomInfo tmpRoomInfo = null;//用于存储获取到的房间信息数据
-            //循环遍历整个数据字典
-            foreach (KeyValuePair<RoomInfo, Dictionary<UserInfo, int>> roomIem in this.roomUserScoreDict)
-            {
-                RoomInfo roomInfo = roomIem.Key;
-                if (roomInfo.Id == roomId)//判断当前循环遍历到的房间的编号与要取的房间信息的编号是否一致(如果一致,将房间信息记录下来,跳出循环)
-                {
-                    tmpRoomInfo = roomInfo;
-                    break;
-                }
-            }
-            return tmpRoomInfo;
-        }
-
-        /// <summary>
         /// 根据房间编号给房间内的客户端用户发明牌数据(只需在一局游戏中第二轮发)
         /// </summary>
         /// <param name="roomId"></param>
@@ -339,52 +212,6 @@ namespace Dlzyff.BoardGameServer.DataCache.Services
             //        LogMessage.Instance.SetLogMessage(valueItem.Key.UserName + " 获得了" + valueItem.Value.ToString());
             //}
             #endregion
-        }
-
-        /// <summary>
-        /// 根据房间编号设置房间内指定用户的分数
-        /// </summary>
-        /// <param name="roomId"></param>
-        /// <param name="userInfo"></param>
-        /// <param name="cardData"></param>
-        public void SetUserScoreByRoomId(int roomId, UserInfo userInfo, string cardData)
-        {
-            if (roomId < 0 || userInfo == null || string.IsNullOrEmpty(cardData))//做参数数据完整校验工作(防止程序抛出异常)
-                return;
-            RoomInfo tmpRoomInfo = this.GetRoomInfoByRoomId(roomId);//根据房间编号获取房间信息数据
-            int userScore = 0;//临时存储用户分数数据
-            bool isGetUserInfoSuccess = this.roomUserScoreDict[tmpRoomInfo].TryGetValue(userInfo, out userScore);
-            //如果获取成功,则开始计算分数
-            if (isGetUserInfoSuccess)
-            {
-                //循环遍历卡牌值得数组
-                foreach (string cardValue in this.cardValues)
-                {
-                    if (cardData.Contains(cardValue))//如果传递过来的卡牌数据中包含卡牌值的话,就计算分数即可
-                    {
-                        switch (cardValue)//判断卡牌的值
-                        {
-                            case "Nine":// +9分
-                                userScore += 9; break;
-                            case "Ten":// +10分
-                                userScore += 10; break;
-                            case "Jack":// +11分
-                                userScore += 11; break;
-                            case "Queen":// +12分
-                                userScore += 12; break;
-                            case "King":// +13分
-                                userScore += 13; break;
-                            case "One":// +15分
-                                userScore += 15; break;
-                        }
-                        break;//这里使用break关键字的用意在于,只进行循环遍历一次,目的是节省性能.
-                    }
-                    else
-                        continue;
-                }
-                if (userScore != 0)//表示计算了一次分数,需要根据用户信息来重新给用户赋分数的值
-                    this.roomUserScoreDict[tmpRoomInfo][userInfo] = userScore;//为用户的分数值重新赋值
-            }
         }
 
         /// <summary>
@@ -499,6 +326,7 @@ namespace Dlzyff.BoardGameServer.DataCache.Services
 
         #endregion
 
+        #region 给指定的客户端对象分发明牌
         /// <summary>
         /// 给指定的客户端发明牌
         /// </summary>
@@ -523,169 +351,77 @@ namespace Dlzyff.BoardGameServer.DataCache.Services
                 }
             }
         }
+        #endregion
 
-        #region 针对所有玩家的一致操作
-
+        #region 根据指定的房间编号设置玩家的分数
         /// <summary>
-        /// 给客户端发明牌
+        /// 根据房间编号设置房间内指定用户的分数
         /// </summary>
-        /// <param name="clients"></param>
-        /// <param name="clientIndex"></param>
-        public void GetClearCard(List<ClientPeer> clients, int clientIndex)
+        /// <param name="roomId"></param>
+        /// <param name="userInfo"></param>
+        /// <param name="cardData"></param>
+        public void SetUserScoreByRoomId(int roomId, UserInfo userInfo, string cardData)
         {
-            ClientPeer peer = clients[clientIndex];
-            //   GetClearCardToClient(peer);
-        }
-
-
-
-        /// <summary>
-        /// 给客户端发底牌
-        /// </summary>
-        /// <param name="clients"></param>
-        /// <param name="clientIndex"></param>
-        public void GetTouchCard(List<ClientPeer> clients, int clientIndex)
-        {
-            ClientPeer currentClientPeer = clients[clientIndex];
-            if (!this.clientScoreDict.ContainsKey(currentClientPeer))
-                this.clientScoreDict.Add(currentClientPeer, 0);
-            string card = this.GetRandomCard();
-            //Console.WriteLine(currentClientPeer.ClientSocket.RemoteEndPoint.ToString() + "摸到底牌：" + card);
-            LogMessage.Instance.SetLogMessage(currentClientPeer.ClientSocket.RemoteEndPoint.ToString() + "摸到底牌：" + card);
-            foreach (string cardValue in this.cardValues)
+            if (roomId < 0 || userInfo == null || string.IsNullOrEmpty(cardData))//做参数数据完整校验工作(防止程序抛出异常)
+                return;
+            RoomInfo tmpRoomInfo = this.GetRoomInfoByRoomId(roomId);//根据房间编号获取房间信息数据
+            int userScore = 0;//临时存储用户分数数据
+            bool isGetUserInfoSuccess = this.roomUserScoreDict[tmpRoomInfo].TryGetValue(userInfo, out userScore);
+            //如果获取成功,则开始计算分数
+            if (isGetUserInfoSuccess)
             {
-                if (card.Contains(cardValue))
-                    this.GetScore(clients[clientIndex], cardValue);
-            }
-            currentClientPeer.OnSendMessage(
-                new SocketMessage()
+                //循环遍历卡牌值得数组
+                foreach (string cardValue in this.cardValues)
                 {
-                    OperationCode = OperationCode.Service,
-                    SubOperationCode = (int)ServiceCode.Passe_Response,
-                    DataValue = card
-                });
-            for (int i = 0; i < clients.Count; i++)
-            {
-                if (clients[i] != currentClientPeer)
-                {
-                    ClientPeer tmpClientPeer = clients[i];
-                    if (!this.clientScoreDict.ContainsKey(tmpClientPeer))
-                        this.clientScoreDict.Add(tmpClientPeer, 0);
-                    tmpClientPeer.OnSendMessage(new SocketMessage()
+                    if (cardData.Contains(cardValue))//如果传递过来的卡牌数据中包含卡牌值的话,就计算分数即可
                     {
-                        OperationCode = OperationCode.Service,
-                        SubOperationCode = (int)ServiceCode.Passe_Response,
-                        DataValue = "底牌"
-                    });
-                    string tmpCard = this.GetRandomCard();
-                    foreach (string cardValue in this.cardValues)
-                    {
-                        if (tmpCard.Contains(cardValue))
-                            this.GetScore(tmpClientPeer, cardValue);
+                        switch (cardValue)//判断卡牌的值
+                        {
+                            case "Nine":// +9分
+                                userScore += 9; break;
+                            case "Ten":// +10分
+                                userScore += 10; break;
+                            case "Jack":// +11分
+                                userScore += 11; break;
+                            case "Queen":// +12分
+                                userScore += 12; break;
+                            case "King":// +13分
+                                userScore += 13; break;
+                            case "One":// +15分
+                                userScore += 15; break;
+                        }
+                        break;//这里使用break关键字的用意在于,只进行循环遍历一次,目的是节省性能.
                     }
+                    else
+                        continue;
                 }
+                if (userScore != 0)//表示计算了一次分数,需要根据用户信息来重新给用户赋分数的值
+                    this.roomUserScoreDict[tmpRoomInfo][userInfo] = userScore;//为用户的分数值重新赋值
             }
         }
+        #endregion
 
+        #region 从玩家分数数据字典中移除玩家的数据
         /// <summary>
-        /// 根据卡牌的值获取分数
-        /// </summary>
-        /// <param name="peer"></param>
-        /// <param name="cardValue"></param>
-        public void GetScore(ClientPeer peer, string cardValue)
-        {
-            if (this.clientScoreDict.ContainsKey(peer))
-            {
-                switch (cardValue)
-                {
-                    case "Nine":
-                        this.clientScoreDict[peer] += 9;
-                        break;
-                    case "Ten":
-                        this.clientScoreDict[peer] += 10;
-                        break;
-                    case "Jack":
-                        this.clientScoreDict[peer] += 11;
-                        break;
-                    case "Queen":
-                        this.clientScoreDict[peer] += 12;
-                        break;
-                    case "King":
-                        this.clientScoreDict[peer] += 13;
-                        break;
-                    case "One":
-                        this.clientScoreDict[peer] += 15;
-                        break;
-                }
-            }
-        }
-
-        /// <summary>
-        /// 
+        /// 移除用户分数数据字典中的用户数据
         /// </summary>
         /// <param name="clientPeer"></param>
-        public void RemoveUserScoreofUserScoreDict(ClientPeer clientPeer)
+        /// <param name="roomId"></param>
+        public void RemoveUserScoreofUserScoreDict(ClientPeer clientPeer, int roomId)
         {
-            this.clientScoreDict.Remove(clientPeer);
-        }
-
-        /// <summary>
-        /// 比较客户端对象之间的分数大小
-        /// </summary>
-        public void CompleteScore()
-        {
-            //计分处理(比较每个玩家的大小值)
-            //比较完毕通知给客户端结果
-            ClientPeer tmpClientPeer = null;//记录分数高的客户端
-            int maxScore = int.MinValue;//记录最大分数
-            foreach (KeyValuePair<ClientPeer, int> clientScoreItem in this.clientScoreDict)//循环当前进入房间内的客户端对象 判断校验谁的分数最大
+            RoomInfo tmpRoomInfo = this.GetRoomInfoByRoomId(roomId);//根据房间编号获取房间信息数据
+            List<UserInfo> userInfos = tmpRoomInfo.UserInfos;
+            foreach (UserInfo user in userInfos)
             {
-                //Console.WriteLine("客户端对象-> {0} 获得的总分为：{1} .", clientScoreItem.Key.ClientSocket.RemoteEndPoint.ToString(), clientScoreItem.Value.ToString());
-                if (clientScoreItem.Value > maxScore)
+                if (user.ClientUserSocket == clientPeer.ClientSocket)
                 {
-                    maxScore = clientScoreItem.Value;
-                    tmpClientPeer = clientScoreItem.Key;
+                    this.roomUserScoreDict[tmpRoomInfo].Remove(user);
+                    break;
                 }
             }
-            //   GetGameResult(tmpClientPeer);
-        }
-
-        /// <summary>
-        /// 获取游戏结果(并需要通知胜利的玩家和失败的玩家,推送消息给他们)
-        /// </summary>
-        /// <param name="clientPeer">获得胜利的客户端对象</param>
-        private void GetGameResult(ClientPeer clientPeer)
-        {
-            if (clientPeer != null)
-            {
-                Console.WriteLine("客户端对象 -> {0} 获取了游戏的胜利~", clientPeer.ClientSocket.RemoteEndPoint.ToString());
-                //给获胜的玩家发送胜利消息
-                clientPeer.OnSendMessage(new SocketMessage()
-                {
-                    OperationCode = OperationCode.Service,
-                    SubOperationCode = (int)GameResultCode.Game_Success_Response,
-                    DataValue = "你的分数最大,你胜利了~"
-                });
-                foreach (KeyValuePair<ClientPeer, int> clientScoreItem in this.clientScoreDict)//循环遍历没有获胜的玩家 通知他们游戏失败的信息
-                {
-                    if (clientScoreItem.Key != clientPeer)//代表不是获胜的玩家
-                    {
-                        //给没有胜利的玩家推送消息
-                        clientScoreItem.Key.OnSendMessage(
-                            new SocketMessage()
-                            {
-                                OperationCode = OperationCode.Service,
-                                SubOperationCode = (int)GameResultCode.Game_Success_Response,
-                                DataValue = "你失败了~"
-                            });
-                    }
-                }
-            }
-            else
-                return;
-            //Todo:推送消息完成,等待下局游戏开始(这里首先判断一局游戏结束时,是否有玩家退出,如果有玩家退出,需要进入游戏等待状态,直到满足最低游戏人数再开始下一局的游戏)
         }
 
         #endregion
+
     }
 }

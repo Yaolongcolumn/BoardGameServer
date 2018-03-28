@@ -10,17 +10,34 @@ using System.Windows.Forms;
 
 namespace Dlzyff.BoardGameServer.ServerView
 {
+    /// <summary>
+    /// 服务端前端主窗体
+    /// </summary>
     public partial class FrmMain : Form
     {
+        /// <summary>
+        /// 添加消息委托对象
+        /// </summary>
         private Action addMessageAction = null;
+        /// <summary>
+        /// 服务端对象
+        /// </summary>
         private ServerPeer serverPeer = new ServerPeer();
+        /// <summary>
+        /// 网络消息转发中心对象
+        /// </summary>
         private IApplicationBase netMsgCenterApp = new NetMessageCenter();
+
+        /// <summary>
+        /// 构造方法
+        /// </summary>
         public FrmMain()
         {
             this.InitializeComponent();
             LogMessage.Instance.AddMessageEvent += this.AddLogMessageEvent;
             this.btnCloseServer.Enabled = false;
         }
+
         /// <summary>
         /// 添加日志消息的回调方法
         /// </summary>
@@ -46,7 +63,7 @@ namespace Dlzyff.BoardGameServer.ServerView
         }
 
         /// <summary>
-        /// 开启服务
+        /// 开启服务端程序(也就是启动服务端程序)
         /// </summary>
         private void StartServer()
         {
@@ -59,7 +76,7 @@ namespace Dlzyff.BoardGameServer.ServerView
         }
 
         /// <summary>
-        /// 关闭服务
+        /// 关闭服务端程序(附加功能:重启服务端程序)
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>

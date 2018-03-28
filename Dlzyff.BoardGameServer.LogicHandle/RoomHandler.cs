@@ -232,7 +232,8 @@ namespace Dlzyff.BoardGameServer.LogicHandle
                             Id = tmpUserInfo.Id,
                             UserName = tmpUserInfo.UserName,
                             Money = tmpUserInfo.Money,
-                            ClientIndex = this.roomCache.GetRoomClientIndexByRoomId(clientPeer, newRoom.Id)
+                            ClientIndex = this.roomCache.GetRoomClientIndexByRoomId(clientPeer, newRoom.Id),
+                            RoomId = newRoom.Id
                         }
                     );
             }
@@ -435,7 +436,8 @@ namespace Dlzyff.BoardGameServer.LogicHandle
                             Id = userInfo.Id,
                             UserName = userInfo.UserName,
                             Money = userInfo.Money,
-                            ClientIndex = this.roomCache.GetRoomClientIndexByRoomId(clientPeer, tmpRoom.Id)
+                            ClientIndex = this.roomCache.GetRoomClientIndexByRoomId(clientPeer, tmpRoom.Id),
+                            RoomId = tmpRoom.Id
                         });
                     LogMessage.Instance.SetLogMessage(userInfo.Id.ToString());
                 }
@@ -491,10 +493,9 @@ namespace Dlzyff.BoardGameServer.LogicHandle
              */
 
             #region 第一种情况处理 -> 根据人数满员的状态下来处理游戏开始
-            if (tmpRoom.PersonNumber == 3)//如果房间人数等于3 代表房间已经满员
-                this.ProcessStartGame(clientPeer, tmpRoom);
+            //if (tmpRoom.PersonNumber == 3)//如果房间人数等于3 代表房间已经满员
+            //    this.ProcessStartGame(clientPeer, tmpRoom);
             #endregion
-
         }
         #endregion
 
@@ -580,7 +581,7 @@ namespace Dlzyff.BoardGameServer.LogicHandle
         {
             #region 移除一些跟客户端对象引用相关的东东
             //需要断开要移除的客户端连接对象所有的引用指针(防止程序出现不正常的现象)
-            this.passeServiceCache.RemoveUserScoreofUserScoreDict(clientPeer);//通过帕斯业务缓存对象从用户积分字典中移除指定地客户端连接对象
+            this.passeServiceCache.RemoveUserScoreofUserScoreDict(clientPeer, roomId);//通过帕斯业务缓存对象从用户积分字典中移除指定地客户端连接对象
             this.passeServiceCache.SubClientPeer(clientPeer);//通过帕斯业务对象从客户端连接对象列表中移除客户端连接对象
             //Todo:中间可能还有其他模块部分需要移除客户端连接对象的引用指针
             //最后才需要从当前玩家要离开的房间中移除客户端对象

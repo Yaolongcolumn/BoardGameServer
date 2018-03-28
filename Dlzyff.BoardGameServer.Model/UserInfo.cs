@@ -1,5 +1,4 @@
 ﻿using System.Net.Sockets;
-
 namespace Dlzyff.BoardGameServer.Model
 {
     /// <summary>
@@ -8,7 +7,7 @@ namespace Dlzyff.BoardGameServer.Model
     public class UserInfo
     {
         private int _id;
-        private string _userName;
+        private string _name;
         private string _headImgName;
         private int _winCount;
         private int _loseCount;
@@ -33,8 +32,8 @@ namespace Dlzyff.BoardGameServer.Model
         /// </summary>
         public string UserName
         {
-            get { return this._userName; }
-            set { this._userName = value; }
+            get { return this._name; }
+            set { this._name = value; }
         }
 
         /// <summary>
