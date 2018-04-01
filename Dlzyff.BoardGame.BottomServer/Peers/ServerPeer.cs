@@ -2,8 +2,10 @@
 using Dlzyff.BoardGame.BottomServer.Pools;
 using Dlzyff.BoardGame.BottomServer.Tools;
 using Dlzyff.BoardGame.Protocol.Codes;
+using Dlzyff.BoardGame.Protocol.Codes.GameCode;
 using Dlzyff.BoardGameServer.Log;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -28,6 +30,11 @@ namespace Dlzyff.BoardGame.BottomServer.Peers
         /// 客户端对象连接池
         /// </summary>
         private ClientPeerPool clientPeerPool;
+
+        /// <summary>
+        /// 存储连接到服务端的玩家
+        /// </summary>
+        private List<ClientPeer> clients = new List<ClientPeer>();
 
         /// <summary>
         /// 应用层
@@ -135,6 +142,7 @@ namespace Dlzyff.BoardGame.BottomServer.Peers
         {
             this.acceptSemaphore.WaitOne();//增加信号量,表示有新的客户端连接到服务端了
             ClientPeer tmpClientPeer = this.clientPeerPool.Dequeue();//从客户端对象连接池中取出一个连接对象供连接到服务端的客户端对象使用
+            this.clients.Add(tmpClientPeer);
             tmpClientPeer.ClientSocket = eventArgs.AcceptSocket;//取得连接对象
             tmpClientPeer.OnSendMessage(OperationCode.User, 0, "你好,玩家~");
             //Console.WriteLine("有客户端对象连接到服务端了~" + tmpClientPeer.ClientSocket.RemoteEndPoint.ToString());
@@ -236,6 +244,22 @@ namespace Dlzyff.BoardGame.BottomServer.Peers
 
         #endregion
 
+        #region 广播发送数据
+        public void BroadcastMessage(string message)
+        {
+            for (int clientIndex = 0; clientIndex < this.clients.Count; clientIndex++)
+            {
+                this.clients[clientIndex].OnSendMessage(new SocketMessage()
+                        {
+                            OperationCode = OperationCode.Message,
+                            SubOperationCode = (int)MessageCode.BroadcastMessage,
+                            DataValue = message
+                        }
+                    );
+            }
+        }
+        #endregion
+
         #region 断开连接
         /// <summary>
         /// 处理客户端断开连接
@@ -258,6 +282,7 @@ namespace Dlzyff.BoardGame.BottomServer.Peers
                 {
                     // Console.WriteLine("有客户端对象断开连接了：" + clientPeer.ClientSocket.RemoteEndPoint.ToString());
                     LogMessage.Instance.SetLogMessage(string.Format("玩家 [ {0} ] 与服务端断开连接了~", clientPeer.ClientSocket.RemoteEndPoint.ToString()));
+                    this.clients.Remove(clientPeer);
                     this.application.OnDisconnect(clientPeer);//通知应用层有客户端连接对象断开连接了
                     clientPeer.OnDisconnect();//关闭客户端连接对象
                     this.clientPeerPool.Enqueue(clientPeer);//复用已经关闭的客户端连接对象

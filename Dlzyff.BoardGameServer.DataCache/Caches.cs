@@ -25,11 +25,23 @@ namespace Dlzyff.BoardGameServer.Cache
         /// </summary>
         public static PasseServiceCache PasseServiceCache { get; set; }
 
+        /// <summary>
+        /// 五轰六炸业务数据缓存对象
+        /// </summary>
+        public static FivebombsWithSixbombsServiceCache FivebombsWithSixbombsServiceCache { get; set; }
+
+        /// <summary>
+        /// 麻将业务数据缓存对象
+        /// </summary>
+        public static MahjongServiceCache MahjongServiceCache { get; set; }
+
         static Caches()
         {
             UserCache = new UserCache();
             RoomCache = new RoomCache();
             PasseServiceCache = new PasseServiceCache();
+            FivebombsWithSixbombsServiceCache = new FivebombsWithSixbombsServiceCache();
+            MahjongServiceCache = new MahjongServiceCache();
         }
     }
 }

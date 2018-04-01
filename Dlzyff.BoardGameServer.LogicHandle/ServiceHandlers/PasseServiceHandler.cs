@@ -25,12 +25,18 @@ namespace Dlzyff.BoardGameServer.LogicHandle.ServiceHandlers
         private PasseServiceCache passeServiceCache = Caches.PasseServiceCache;
         public void OnDisconnect(ClientPeer clientPeer)
         {
-            if (clientPeer!=null)
+            if (clientPeer != null)
             {
                 clientPeer.OnDisconnect();
             }
         }
 
+        /// <summary>
+        /// 接收客户端发送过来的消息
+        /// </summary>
+        /// <param name="clientPeer">发送消息的客户端对象</param>
+        /// <param name="subOperationCode">发送给指定模块的子操作码</param>
+        /// <param name="dataValue">消息附带的数据</param>
         public void OnReceiveMessage(ClientPeer clientPeer, int subOperationCode, object dataValue)
         {
             PasseGameCode passeGameCode = (PasseGameCode)Enum.Parse(typeof(PasseGameCode), subOperationCode.ToString());
@@ -56,13 +62,13 @@ namespace Dlzyff.BoardGameServer.LogicHandle.ServiceHandlers
                         //解析客户端发送过来的踢牌的数据
                         //解析格式：房间编号,筹码(钱)
                         string[] playDataSplit = dataValue.ToString().Split(',');
-                        string roomIdStr = playDataSplit[0];
-                        string moneyStr = playDataSplit[1];
+                        string roomIdStr = playDataSplit[0];//取出解析完毕的房间号
+                        string moneyStr = playDataSplit[1];//取出解析完毕要下注的筹码值
                         //判断客户端传递过来的房间编号值是否能够转换成功
                         if (int.TryParse(roomIdStr, out int roomId))//如果转换成功了
                         {
-                            if (int.TryParse(moneyStr,out int money))
-                                this.ProcessPlayRequest(clientPeer, roomId,money);
+                            if (int.TryParse(moneyStr, out int money))
+                                this.ProcessPlayRequest(clientPeer, roomId, money);
                         }
                     }
                     break;
@@ -96,9 +102,10 @@ namespace Dlzyff.BoardGameServer.LogicHandle.ServiceHandlers
             //this.passeServiceCache.SubPourByClient(clientPeer);
             this.userCache.SubMoney(clientPeer, 100);
             //服务端需要给客户端发送一张明牌的数据
-            this.passeServiceCache.GetClearCardToClient(clientPeer, roomId);
+            //this.passeServiceCache.GetClearCardToClient(clientPeer, roomId);
             //计算分数
             //   this.passeServiceCache.CompleteUserScoreByRoomId(roomId);
+            this.passeServiceCache.ChangeRoomFollowcardUserDictionaryByRoomId(roomId, clientPeer);
         }
         #endregion
 

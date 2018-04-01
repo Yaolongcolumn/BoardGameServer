@@ -50,5 +50,17 @@ namespace Dlzyff.BoardGame.BottomServer.Tools
             this.SubOperationCode = subOperationCode;
             this.DataValue = dataValue;
         }
+        /// <summary>
+        /// 更改网络消息
+        /// </summary>
+        /// <param name="operationCode">操作指令码</param>
+        /// <param name="subOperationCode">子操作指令码</param>
+        /// <param name="dataValue">数据值</param>
+        public void ChangeMessage(OperationCode operationCode, int subOperationCode, object dataValue)
+        {
+            this.OperationCode = operationCode;
+            this.SubOperationCode = subOperationCode;
+            this.DataValue = dataValue;
+        }
     }
 }

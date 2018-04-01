@@ -93,6 +93,10 @@
         /// <summary>
         ///     房间解散广播响应码
         /// </summary>
-        DisbanadRoom_BroadcastResponse
+        DisbanadRoom_BroadcastResponse,
+        /// <summary>
+        ///  房间消息响应码
+        /// </summary>
+        MessageResponse
     }
 }

@@ -3,69 +3,101 @@ using Dlzyff.BoardGameServer.Model;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
+
 namespace Dlzyff.BoardGameServer.Dao.Tools
 {
     /// <summary>
-    /// 数据库操作工具类
+    /// 棋牌游戏数据库操作工具类
     /// </summary>
     public static class BroadgameDBTool
     {
+        #region 数据库连接字符串
         /// <summary>
         /// 连接字符串
         /// </summary>
-        public static string SQL_CONNECT_STR = string.Empty;
+        public static string SQL_CONNECT_STR = string.Empty; 
+        #endregion
+
+        #region 操作数据库相关的对象
         /// <summary>
         /// 连接对象
         /// </summary>
         public static SqlConnection connection = null;
+
         /// <summary>
         /// 命令对象
         /// </summary>
         public static SqlCommand command = null;
+
         /// <summary>
         /// 数据读取器对象
         /// </summary>
         public static SqlDataReader reader = null;
+
         /// <summary>
         /// 数适配器对象
         /// </summary>
         public static SqlDataAdapter adapter = null;
+        #endregion
+
+        #region Sql命令 与 附带的参数列表
         /// <summary>
         /// 数据库命令
         /// </summary>
         public static string sqlCommandText = string.Empty;
+
         /// <summary>
         /// 参数列表
         /// </summary>
         public static List<SqlParameter> parameters = null;
+        #endregion
 
+        #region 构造方法
         static BroadgameDBTool()
         {
             connection = new SqlConnection(SQL_CONNECT_STR);
             parameters = new List<SqlParameter>();
-        }
+        } 
+        #endregion
 
+        #region 设置数据库连接字符串
         /// <summary>
         /// 设置连接字符串
         /// </summary>
         /// <param name="connectStr">连接字符串</param>
         public static void SetConnectStr(string connectStr)
         {
-            SQL_CONNECT_STR = connectStr;
+            if (!string.IsNullOrEmpty(connectStr))
+                SQL_CONNECT_STR = connectStr;
         }
+        #endregion
 
+        #region 设置Sql命令
         /// <summary>
         /// 设置命令
         /// </summary>
         /// <param name="commandText"></param>
-        public static void SetCommandText(string commandText) { }
+        public static void SetCommandText(string commandText)
+        {
+            if (!string.IsNullOrEmpty(commandText))
+                sqlCommandText = commandText;
+        }
+        #endregion
 
+        #region 设置Sql命令附带的参数列表
         /// <summary>
         /// 设置参数列表
         /// </summary>
         /// <param name="parameters"></param>
-        public static void SetParameterList(params SqlParameter[] parameters) { }
+        public static void SetParameterList(params SqlParameter[] parameters)
+        {
+            if (parameters != null && parameters.Length > 0)
+                BroadgameDBTool.parameters = parameters.ToList();
+        } 
+        #endregion
 
+        #region 数据库增删改查基本操作
         /// <summary>
         ///  向指定数据表中插入数据(向数据库中的对应数据表插入一条新的数据的操作)
         /// </summary>
@@ -171,31 +203,21 @@ namespace Dlzyff.BoardGameServer.Dao.Tools
         }
 
         /// <summary>
-        /// 执行普通数据库操作命令
-        /// </summary>
-        public static void NoramlExecute()
-        {
-            //1.构建数据库执行命令的对象
-            using (command = new SqlCommand(sqlCommandText, connection))
-            {
-                //2.校验参数列表是否为空 且 包含的参数元素是否不为0
-                if (parameters != null && parameters.Count > 0)//如果教程成功
-                    command.Parameters.AddRange(parameters.ToArray());//将参数列表添加至命令对象的参数列表中
-                //3.取得执行普通命令时的执行记录结果
-                int recordResult = command.ExecuteNonQuery();
-                LogMessage.Instance.SetLogMessage("执行完毕普通数据库操作命令所受影响的行数：" + recordResult.ToString() + " .");
-                //4.执行完毕后 将参数列表清空
-                parameters.Clear();
-            }
-        }
-
-        /// <summary>
         /// 执行单查询操作(也就是相当于查询一条数据保存到一个object中,将保存的数据返回给上层进行处理)
         /// </summary>
         /// <returns></returns>
         public static object SingleQuery()
         {
-            return new object();
+            object o = null;
+            using (command = new SqlCommand(sqlCommandText, connection))
+            {
+                if (parameters != null && parameters.Count > 0)
+                {
+                    command.Parameters.AddRange(parameters.ToArray());
+                }
+                o = command.ExecuteScalar();
+            }
+            return o;
         }
 
         /// <summary>
@@ -222,5 +244,50 @@ namespace Dlzyff.BoardGameServer.Dao.Tools
         {
 
         }
+        #endregion
+
+        #region 执行命令
+        /// <summary>
+        /// 执行普通数据库操作命令
+        /// </summary>
+        public static void NoramlExecute()
+        {
+            //1.构建数据库执行命令的对象
+            using (command = new SqlCommand(sqlCommandText, connection))
+            {
+                //2.校验参数列表是否为空 且 包含的参数元素是否不为0
+                if (parameters != null && parameters.Count > 0)//如果教程成功
+                    command.Parameters.AddRange(parameters.ToArray());//将参数列表添加至命令对象的参数列表中
+                //3.取得执行普通命令时的执行记录结果
+                int recordResult = command.ExecuteNonQuery();
+                LogMessage.Instance.SetLogMessage("执行完毕普通数据库操作命令所受影响的行数：" + recordResult.ToString() + " .");
+                //4.执行完毕后 将参数列表清空
+                parameters.Clear();
+            }
+        }
+        #endregion
+
+        #region 校验账户相关数据
+        /// <summary>
+        /// 检查账户信息是否匹配(其实就是检验账户名和账户密码是否匹配)
+        /// </summary>
+        /// <param name="accountInfo"></param>
+        /// <returns></returns>
+        public static bool CheckAccountInfoIsMatch(AccountInfo accountInfo)
+        {
+            bool isMatch = false;//定义一个临时标志位
+            SetCommandText("Select count(*) AccountInfo Where Name == @Name and Password == @Pwd");//构建Sql命令
+            //设置参数列表
+            SetParameterList
+                (
+                    new SqlParameter() { ParameterName = "@Name", SqlDbType = SqlDbType.NVarChar, Size = 15, Value = accountInfo.Name },
+                    new SqlParameter() { ParameterName = "@Pwd", SqlDbType = SqlDbType.NVarChar, Size = 15, Value = accountInfo.Password }
+                );
+            int res = (int)SingleQuery();//执行单查询命令
+            if (res > 0)//如果结果大于0
+                isMatch = true;//设置标志位
+            return isMatch;
+        }
+        #endregion
     }
 }

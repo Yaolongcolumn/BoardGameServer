@@ -11,12 +11,12 @@ namespace Dlzyff.BoardGameServer.LogicHandle.ServiceHandlers
     {
         public void OnDisconnect(ClientPeer clientPeer)
         {
-            throw new NotImplementedException();
+          
         }
 
         public void OnReceiveMessage(ClientPeer clientPeer, int subOperationCode, object dataValue)
         {
-            throw new NotImplementedException();
+            
         }
     }
 }

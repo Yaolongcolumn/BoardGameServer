@@ -8,6 +8,7 @@ namespace Dlzyff.BoardGameServer.Dao
     /// </summary>
     public class AccountInfoDao
     {
+        #region 注册账户
         /// <summary>
         /// 注册账户
         /// Todo:玩家使用第三方平台登录以后,取到登录后的用户信息以后,服务端重新为该用户注册一个属于当前应用的对应账户
@@ -24,8 +25,10 @@ namespace Dlzyff.BoardGameServer.Dao
             //如果写入成功,将信息通过日志管理类进行消息转发到服务端表现层显示出来
             AccountInfo newAccount = new AccountInfo(accountName, accountPwd);
             BroadgameDBTool.InsertData<AccountInfo>(Tables.AccountInfo, newAccount);
-        }
+        } 
+        #endregion
 
+        #region 注销账户
         /// <summary>
         /// 注销账户
         /// </summary>
@@ -39,8 +42,10 @@ namespace Dlzyff.BoardGameServer.Dao
             //以下的操作需要将校验结果返回给逻辑处理层 进行程序逻辑编写
             //执行完成之后,校验是否注销账户成功
             //如果注销账户成功,将信息通过日志管理类进行消息转发到服务端表现层显示出来
-        }
+        } 
+        #endregion
 
+        #region 校验账户名 和 密码 是否匹配
         /// <summary>
         /// 检查账户信息数据是否匹配
         /// </summary>
@@ -53,6 +58,8 @@ namespace Dlzyff.BoardGameServer.Dao
             //以下的操作需要将校验结果返回给逻辑处理层 进行程序逻辑编写
             //如果判断结果为真 提示玩家登陆成功
             //否则判断结果为假 提示玩家登录失败
-        }
+            BroadgameDBTool.CheckAccountInfoIsMatch(new AccountInfo(accountName, accountPwd));
+        } 
+        #endregion
     }
 }

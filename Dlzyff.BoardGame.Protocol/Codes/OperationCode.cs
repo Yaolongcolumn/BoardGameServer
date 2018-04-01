@@ -24,6 +24,10 @@
         /// <summary>
         /// 游戏码
         /// </summary>
-        GameResult
+        GameResult,
+        /// <summary>
+        /// 消息码
+        /// </summary>
+        Message
     }
 }

@@ -31,7 +31,7 @@
             this.btnStartServer = new System.Windows.Forms.Button();
             this.btnCloseServer = new System.Windows.Forms.Button();
             this.btnBroadcastMessage = new System.Windows.Forms.Button();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.txtBroadcastMessage = new System.Windows.Forms.TextBox();
             this.logMessageList = new System.Windows.Forms.ListBox();
             this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
@@ -67,14 +67,15 @@
             this.btnBroadcastMessage.TabIndex = 2;
             this.btnBroadcastMessage.Text = "广播消息";
             this.btnBroadcastMessage.UseVisualStyleBackColor = true;
+            this.btnBroadcastMessage.Click += new System.EventHandler(this.BtnBroadcastMessage_Click);
             // 
-            // textBox1
+            // txtBroadcastMessage
             // 
-            this.textBox1.Location = new System.Drawing.Point(4, 631);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(896, 38);
-            this.textBox1.TabIndex = 3;
+            this.txtBroadcastMessage.Location = new System.Drawing.Point(4, 631);
+            this.txtBroadcastMessage.Multiline = true;
+            this.txtBroadcastMessage.Name = "txtBroadcastMessage";
+            this.txtBroadcastMessage.Size = new System.Drawing.Size(896, 38);
+            this.txtBroadcastMessage.TabIndex = 3;
             // 
             // logMessageList
             // 
@@ -104,7 +105,7 @@
             this.ClientSize = new System.Drawing.Size(1120, 681);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.logMessageList);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.txtBroadcastMessage);
             this.Controls.Add(this.btnBroadcastMessage);
             this.Controls.Add(this.btnCloseServer);
             this.Controls.Add(this.btnStartServer);
@@ -125,7 +126,7 @@
         private System.Windows.Forms.Button btnStartServer;
         private System.Windows.Forms.Button btnCloseServer;
         private System.Windows.Forms.Button btnBroadcastMessage;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox txtBroadcastMessage;
         private System.Windows.Forms.ListBox logMessageList;
         private System.Windows.Forms.Label label1;
     }

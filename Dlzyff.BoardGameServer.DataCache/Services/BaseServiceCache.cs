@@ -11,16 +11,6 @@ namespace Dlzyff.BoardGameServer.DataCache.Services
     public abstract class BaseServiceCache : IServiceCacheable
     {
         /// <summary>
-        /// 存储卡牌花色
-        /// </summary>
-        protected string[] cardColors = null;
-
-        /// <summary>
-        /// 存储卡牌的值
-        /// </summary>
-        protected string[] cardValues = null;
-
-        /// <summary>
         /// 存储所有卡牌
         /// </summary>
         protected List<string> allCards = new List<string>();
@@ -56,29 +46,30 @@ namespace Dlzyff.BoardGameServer.DataCache.Services
         /// </summary>
         public abstract void InitCardsData();
 
+        public virtual void ResetCards() { }
+        #endregion
+
+        #region 显示所有卡牌
         /// <summary>
-        /// 重置卡牌牌数据
+        /// 显示所有卡牌
         /// </summary>
-        public virtual void ResetCards()
+        public void DisplayAllCards()
         {
-            //生成所有卡牌
-            for (int cardColorIndex = 0; cardColorIndex < this.cardColors.Length; cardColorIndex++)
+            if (resCards.Count == 0)
+                return;
+            int count = 0;
+            //Console.WriteLine(this.resCards.Count);
+            for (int cardIndex = 0; cardIndex < this.resCards.Count; cardIndex++)
             {
-                for (int cardValueIndex = 0; cardValueIndex < this.cardValues.Length; cardValueIndex++)
+                if (count == 5)
                 {
-                    string tmpCardValue = this.cardColors[cardColorIndex] + this.cardValues[cardValueIndex];
-                    this.allCards.Add(tmpCardValue);
+                    Console.WriteLine();
+                    count = 0;
                 }
+                Console.Write(this.resCards[cardIndex] + " ");
+                count++;
             }
-            //打乱扑克牌
-            int cardCount = this.cardColors.Length * this.cardValues.Length;//取得卡牌的总个数
-            for (int cardIndex = 0; cardIndex < cardCount; cardIndex++)//根据卡牌总个数进行循环遍历处理
-            {
-                int ranIndex = this.ranCardIndex.Next(0, this.allCards.Count);//从所有卡牌中随机取出一个卡牌的索引值
-                this.resCards.Add(this.allCards[ranIndex]);//根据取出的索引值获取对应的数据 添加到存放打乱卡牌的集合中
-                this.allCards.RemoveAt(ranIndex);//取出添加完毕 将数据删除
-            }
-        } 
+        }
         #endregion
 
         #region 增加和移除客户端连接对象
@@ -107,7 +98,7 @@ namespace Dlzyff.BoardGameServer.DataCache.Services
         #endregion
 
         #region 获取一张随机卡牌
-        public abstract string GetRandomCard(); 
+        public abstract string GetRandomCard();
         #endregion
 
         #region 添加、获取房间信息
@@ -115,10 +106,7 @@ namespace Dlzyff.BoardGameServer.DataCache.Services
         /// 添加房间信息对象
         /// </summary>
         /// <param name="roomInfo">要添加的房间信息</param>
-        public virtual void AddRoomInfo(RoomInfo roomInfo)
-        {
-
-        }
+        public abstract void AddRoomInfo(RoomInfo roomInfo);
 
         /// <summary>
         /// 根据房间编号获取房间信息数据
@@ -128,7 +116,7 @@ namespace Dlzyff.BoardGameServer.DataCache.Services
         protected RoomInfo GetRoomInfoByRoomId(int roomId)
         {
             return this.roomCache.GetRoomInfoByRoomId(roomId);
-        } 
+        }
         #endregion
     }
 }

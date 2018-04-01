@@ -1,9 +1,6 @@
-﻿using Dlzyff.BoardGameServer.Model;
-using System;
+﻿using Dlzyff.BoardGameServer.Dao.Tools;
+using Dlzyff.BoardGameServer.Model;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Dlzyff.BoardGameServer.Dao
 {
@@ -12,6 +9,7 @@ namespace Dlzyff.BoardGameServer.Dao
     /// </summary>
     public class UserInfoDao
     {
+        #region 创建添加用户信息
         /// <summary>
         /// 根据账户编号添加用户
         /// </summary>
@@ -26,8 +24,11 @@ namespace Dlzyff.BoardGameServer.Dao
             //以下的操作需要将校验结果返回给逻辑处理层 进行程序逻辑编写
             //写入完成之后,校验是否写入成功
             //如果写入成功,将信息通过日志管理类进行消息转发到服务端表现层显示出来
+            BroadgameDBTool.InsertData<UserInfo>(Tables.UserInfo, userInfo);
         }
+        #endregion
 
+        #region 移除用户信息
         /// <summary>
         /// 根据用户编号移除用户信息
         /// </summary>
@@ -41,7 +42,9 @@ namespace Dlzyff.BoardGameServer.Dao
             //完成逻辑删除操作之后,校验是否逻辑删除成功
             //如果逻辑删除成功,将信息通过日志管理类进行消息转发到服务端表现层显示出来
         }
+        #endregion
 
+        #region 根据用户编号增加钱数
         /// <summary>
         /// 根据用户编号增加钱数
         /// </summary>
@@ -58,13 +61,14 @@ namespace Dlzyff.BoardGameServer.Dao
             //以下的操作需要将校验结果返回给逻辑处理层 进行程序逻辑编写
             //显示玩家新的钱数信息即可
         }
+        #endregion
 
+        #region 根据用户编号减少钱数
         /// <summary>
         /// 根据用户编号减少钱数
         /// </summary>
         /// <param name="userId"></param>
         /// <param name="money"></param>
-
         public void SubMoneyByUserId(int userId, int money)
         {
             //Todo:首先判断这个用户编号下是否存在
@@ -75,11 +79,19 @@ namespace Dlzyff.BoardGameServer.Dao
             //以下的操作需要将校验结果返回给逻辑处理层 进行程序逻辑编写
             //显示玩家新的钱数信息即可
         }
+        #endregion
 
+        #region 获取用户信息
+            
+        /// <summary>
+        /// 根据指定用户编号获取用户信息
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         public UserInfo GetUserInfoByUserId(int userId)
         {
             return new UserInfo();
-        }
+        }   
 
         /// <summary>
         /// 获取所有用户信息
@@ -88,6 +100,7 @@ namespace Dlzyff.BoardGameServer.Dao
         public List<UserInfo> GetAllUserinfo()
         {
             return new List<UserInfo>();
-        }
+        } 
+        #endregion
     }
 }

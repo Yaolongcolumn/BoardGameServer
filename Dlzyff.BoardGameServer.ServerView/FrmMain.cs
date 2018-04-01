@@ -72,6 +72,7 @@ namespace Dlzyff.BoardGameServer.ServerView
             BroadgameDBTool.SetConnectStr("这儿填写数据库连接字符串");//可以从配置文件中读取数据库连接字符串
             this.logMessageList.Items.Add("服务器启动成功~");
             this.logMessageList.Items.Add("等待客户端对象的连接~");
+            MessageBox.Show("服务器启动成功~", "提示信息:", MessageBoxButtons.OK, MessageBoxIcon.Information);
             this.btnStartServer.Enabled = false;
         }
 
@@ -90,6 +91,25 @@ namespace Dlzyff.BoardGameServer.ServerView
                 this.StartPosition = FormStartPosition.WindowsDefaultLocation;
 
             }
+        }
+
+        /// <summary>
+        /// 处理广播消息的按钮点击事件处理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BtnBroadcastMessage_Click(object sender, EventArgs e)
+        {
+            string message = this.txtBroadcastMessage.Text;
+            if (!string.IsNullOrEmpty(message))
+            {
+                if (this.serverPeer != null)
+                    this.serverPeer.BroadcastMessage(message);
+                else
+                    MessageBox.Show("不能广播消息,服务器未打开~", "提示信息:", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+                MessageBox.Show("发送的消息不能为空~", "提示信息:", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }
