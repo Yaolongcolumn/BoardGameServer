@@ -4,8 +4,7 @@ using Dlzyff.BoardGameServer.Dao.Tools;
 using Dlzyff.BoardGameServer.Log;
 using Dlzyff.BoardGameServer.ServerView.Centers;
 using System;
-using System.Diagnostics;
-using System.Reflection;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace Dlzyff.BoardGameServer.ServerView
@@ -72,7 +71,6 @@ namespace Dlzyff.BoardGameServer.ServerView
             BroadgameDBTool.SetConnectStr("这儿填写数据库连接字符串");//可以从配置文件中读取数据库连接字符串
             this.logMessageList.Items.Add("服务器启动成功~");
             this.logMessageList.Items.Add("等待客户端对象的连接~");
-            MessageBox.Show("服务器启动成功~", "提示信息:", MessageBoxButtons.OK, MessageBoxIcon.Information);
             this.btnStartServer.Enabled = false;
         }
 
@@ -83,13 +81,10 @@ namespace Dlzyff.BoardGameServer.ServerView
         /// <param name="e"></param>
         private void BtnCloseServer_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("要重新启动嘛？", "提示", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageBox.Show("确定要关闭服务嘛？", "提示信息:", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 this.serverPeer.Close();
                 Application.Exit();
-                Process.Start(Assembly.GetExecutingAssembly().Location);
-                this.StartPosition = FormStartPosition.WindowsDefaultLocation;
-
             }
         }
 
@@ -110,6 +105,19 @@ namespace Dlzyff.BoardGameServer.ServerView
             }
             else
                 MessageBox.Show("发送的消息不能为空~", "提示信息:", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void BtnReStartServer_Click(object sender, EventArgs e)
+        {
+            this.btnStartServer.Enabled = false;
+            this.btnCloseServer.Enabled = false;
+            if (MessageBox.Show("要重新启动嘛？", "提示信息:", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                this.serverPeer.Close();
+                Application.Restart();
+                //Process.Start(Assembly.GetExecutingAssembly().Location);
+                //this.StartPosition = FormStartPosition.WindowsDefaultLocation;
+            }
         }
     }
 }

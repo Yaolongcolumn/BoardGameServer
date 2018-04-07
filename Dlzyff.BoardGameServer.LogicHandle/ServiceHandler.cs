@@ -45,7 +45,7 @@ namespace Dlzyff.BoardGameServer.LogicHandle
         public void OnReceiveMessage(ClientPeer clientPeer, int subOperationCode, object dataValue)
         {
             GameServiceTypeCode serviceCode = (GameServiceTypeCode)Enum.Parse(typeof(GameServiceTypeCode), subOperationCode.ToString());
-            string[] dataSplits = dataValue.ToString().Split(',');
+            string[] dataSplits = dataValue.ToString().Split('|');
             string serviceSubCode = dataSplits[0];
             string data = dataSplits[1];
             switch (serviceCode)

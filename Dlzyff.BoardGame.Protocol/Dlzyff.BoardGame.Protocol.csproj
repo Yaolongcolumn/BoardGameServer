@@ -52,6 +52,7 @@
     <Compile Include="Codes\RoomCode.cs" />
     <Compile Include="Codes\UserCode.cs" />
     <Compile Include="Dto\AccountDto.cs" />
+    <Compile Include="Dto\PokerInfoDto.cs" />
     <Compile Include="Dto\RoomInfoDto.cs" />
     <Compile Include="Dto\ServiceDto\BaseServiceDto.cs" />
     <Compile Include="Dto\ServiceDto\PasseServiceDto.cs" />

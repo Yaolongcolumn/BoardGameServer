@@ -15,10 +15,13 @@ namespace Dlzyff.BoardGameServer.DataCache.Room
     {
 
         #region 常量
+        public const int Passe_MIN_PERSON_NUMBER = 2;
         /// <summary>
         /// 房间内的最大玩家数
         /// </summary>
-        public const int MAX_PERSON_NUMBER = 4;
+        public const int Passe_MAX_PERSON_NUMBER = 5;
+        public const int Five_MAX_PERSON_NUMBER = 4;
+        public const int Mahjong_MAX_PERSON_NUMBER = 4;
         #endregion
 
         #region 成员变量
@@ -266,23 +269,17 @@ namespace Dlzyff.BoardGameServer.DataCache.Room
         {
             //离开的时候需要把客户端用户从房间内移除
             List<UserInfo> userInfos = this.RoomIdRooms[roomId].UserInfos;
-            try
+            for (int userIndex = 0; userIndex < userInfos.Count; userIndex++)
             {
-                for (int userIndex = 0; userIndex < userInfos.Count; userIndex++)
+                if (userInfos[userIndex].ClientUserSocket == clientPeer.ClientSocket)
                 {
-                    if (userInfos[userIndex].ClientUserSocket == clientPeer.ClientSocket)
-                    {
-                        this.RoomIdRooms[roomId].UserInfos.Remove(userInfos[userIndex]);
-                        break;
-                    }
+                    this.RoomIdRooms[roomId].UserInfos.Remove(userInfos[userIndex]);
+                    break;
                 }
-                this.RoomClientsDict[this.RoomIdRooms[roomId]].Remove(clientPeer);//从房间客户端对象中移除指定客户端连接对象
-                this.RoomIdRooms[roomId].PersonNumber--;//离开房间以后需要将人数减少1
-                LogMessage.Instance.SetLogMessage(clientPeer.ClientSocket.RemoteEndPoint.ToString() + " 离开了 [ " + roomId + " ] 房间~");
             }
-            catch
-            {
-            }
+            this.RoomClientsDict[this.RoomIdRooms[roomId]].Remove(clientPeer);//从房间客户端对象中移除指定客户端连接对象
+            this.RoomIdRooms[roomId].PersonNumber--;//离开房间以后需要将人数减少1
+            LogMessage.Instance.SetLogMessage(clientPeer.ClientSocket.RemoteEndPoint.ToString() + " 离开了 [ " + roomId + " ] 房间~");
             return this._roomIdRooms[roomId];
         }
         #endregion
@@ -301,9 +298,10 @@ namespace Dlzyff.BoardGameServer.DataCache.Room
                 this.RoomReadyClientDict[this.GetRoomInfoByRoomId(roomId)].Add(clientPeer, true);//给这个新构建好的数据 添加进一个房间内要准备的玩家对象 和 该玩家对象的准备标志位
                 LogMessage.Instance.SetLogMessage("玩家 [" + clientPeer.ClientSocket.RemoteEndPoint.ToString() + "] 在房间编号为 [" + roomId + "] 进行了准备~");//添加完成 显示出来
             }
-            else//否则房间准备玩家的数据字典中存在房间这个键的情况
+            else
             {
-                this.RoomReadyClientDict[this.GetRoomInfoByRoomId(roomId)].Add(clientPeer, true);//给这个已经存在的数据 添加一个房间内要准备的玩家对象 和 该玩家对象的准备标志位
+                this.RoomReadyClientDict[this.GetRoomInfoByRoomId(roomId)].Remove(clientPeer);
+                this.RoomReadyClientDict[this.GetRoomInfoByRoomId(roomId)].Add(clientPeer, true);//给这个新构建好的数据 添加进一个房间内要准备的玩家对象 和 该玩家对象的准备标志位
                 LogMessage.Instance.SetLogMessage("玩家 [" + clientPeer.ClientSocket.RemoteEndPoint.ToString() + "] 在房间编号为 [" + roomId + "] 进行了准备~");//添加完成 显示出来
             }
         }
@@ -320,6 +318,7 @@ namespace Dlzyff.BoardGameServer.DataCache.Room
             if (this.RoomReadyClientDict.ContainsKey(this.GetRoomInfoByRoomId(roomId)))//如果房间准备玩家的数据字典中存在房间这个键的情况
             {
                 this.RoomReadyClientDict[this.GetRoomInfoByRoomId(roomId)][clientPeer] = false;//给这个已经存在的数据 修改一个房间内要准备的玩家对象的准备标志位
+                this.RoomReadyClientDict[this.GetRoomInfoByRoomId(roomId)].Remove(clientPeer);
                 LogMessage.Instance.SetLogMessage("玩家 [" + clientPeer.ClientSocket.RemoteEndPoint.ToString() + "] 在房间编号为 [" + roomId + "] 取消了准备~");
             }
             else//如果不存在 直接不做任何处理 做return 操作
@@ -407,6 +406,29 @@ namespace Dlzyff.BoardGameServer.DataCache.Room
         }
         #endregion
 
+        #region 根据房间编号获取一个房间内的所有连接对象
+        /// <summary>
+        /// 根据房间编号获取房间内的所有连接对象
+        /// </summary>
+        /// <param name="roomId"></param>
+        /// <returns></returns>
+        public List<ClientPeer> GetClientPeersByRoomId(int roomId)
+        {
+            List<ClientPeer> clientPeers = new List<ClientPeer>();
+            RoomInfo room = this.GetRoomInfoByRoomId(roomId);
+            clientPeers = this.RoomClientsDict[room];
+            return clientPeers;
+        }
+        #endregion
+
+        public List<UserInfo> GetUserInfosByRoomId(int roomId)
+        {
+            List<UserInfo> userInfos = new List<UserInfo>();
+            RoomInfo room = this.GetRoomInfoByRoomId(roomId);
+            userInfos = room.UserInfos;
+            return userInfos;
+        }
+
         #region 是不是房主
         /// <summary>
         /// 校验指定的客户端连接对象是不是房主(说白了 就是创建房间的客户端)
@@ -424,6 +446,34 @@ namespace Dlzyff.BoardGameServer.DataCache.Room
 
         #endregion
 
+        #region 是否在房间内
+        /// <summary>
+        /// 判断是否在房间内,在的话直接将房间编号使用 out 关键字传出即可
+        /// </summary>
+        /// <param name="clientPeer"></param>
+        /// <param name="roomId"></param>
+        /// <returns></returns>
+        public bool IsInRoom(ClientPeer clientPeer, out int roomId)
+        {
+            bool isIn = false;
+            int tmpRoomId = 0;
+            foreach (KeyValuePair<RoomInfo, List<ClientPeer>> roomItem in this.RoomClientsDict)
+            {
+                List<ClientPeer> clientPeers = roomItem.Value;
+                for (int clientIndex = 0; clientIndex < clientPeers.Count; clientIndex++)
+                {
+                    if (clientPeers[clientIndex] == clientPeer)
+                    {
+                        isIn = true;
+                        tmpRoomId = roomItem.Key.Id;
+                    }
+                }
+            }
+            roomId = tmpRoomId;
+            return isIn;
+        }
+        #endregion
+
         #region 是否可以开始游戏
         /// <summary>
         /// 是否可以开始游戏
@@ -437,6 +487,7 @@ namespace Dlzyff.BoardGameServer.DataCache.Room
                 return isStartGame = false;
             else
             {
+
                 //判断房间内的玩家个数 是否 和 房间内准备的玩家个数是否保持一致
                 int readyCount = 0;
                 //如果取到的房间不为空的话
@@ -449,16 +500,48 @@ namespace Dlzyff.BoardGameServer.DataCache.Room
                             readyCount++;   //准备了就让准备个数+1(表示房间内有一个玩家准备了)
                     }
                 }
-                if (tmpRoomInfo.UserInfos.Count == readyCount)//如果准备的玩家个数 和 房间内的玩家个数 保持一致的话 则表示可以进行开始游戏了~
+                int userCount = tmpRoomInfo.UserInfos.Count;
+                switch (tmpRoomInfo.ServiceType)
                 {
-                    isStartGame = true;//设置可以开始游戏的标志位
-                    LogMessage.Instance.SetLogMessage("房间编号为 [" + roomId.ToString() + "] 准备开始游戏了~");
-                }
-                else
-                {
-                    LogMessage.Instance.SetLogMessage("房间编号为 [" + roomId.ToString() + "] 现在还不能开始游戏~");
-                    LogMessage.Instance.SetLogMessage("为什么不能开始游戏呢?因为房间编号为 [" + roomId.ToString() + "] 的总玩家个数为 [" + tmpRoomInfo.UserInfos.Count + "]" + ",但是现在准备的玩家只有 [" + this.RoomReadyClientDict.Values.Count.ToString() + "].");
-                    return isStartGame;
+                    case RoomGameServiceType.PasseService:
+                        if (userCount == readyCount && userCount >= Passe_MIN_PERSON_NUMBER && userCount < Passe_MAX_PERSON_NUMBER + 1)//如果准备的玩家个数 和 房间内的玩家个数 保持一致的话 则表示可以进行开始游戏了~
+                        {
+                            isStartGame = true;//设置可以开始游戏的标志位
+                            LogMessage.Instance.SetLogMessage("房间编号为 [" + roomId.ToString() + "] 准备开始游戏了~");
+                        }
+                        else
+                        {
+                            LogMessage.Instance.SetLogMessage("房间编号为 [" + roomId.ToString() + "] 现在还不能开始游戏~");
+                            LogMessage.Instance.SetLogMessage("为什么不能开始游戏呢?因为房间编号为 [" + roomId.ToString() + "] 的总玩家个数为 [" + tmpRoomInfo.UserInfos.Count + "]" + ",但是现在准备的玩家只有 [" + this.RoomReadyClientDict.Values.Count.ToString() + "].");
+                            return isStartGame;
+                        }
+                        break;
+                    case RoomGameServiceType.FivebombsWithSixbombsService:
+                        if (userCount == readyCount && userCount >= 4 && userCount % 2 == 0)//如果准备的玩家个数 和 房间内的玩家个数 保持一致的话 则表示可以进行开始游戏了~
+                        {
+                            isStartGame = true;//设置可以开始游戏的标志位
+                            LogMessage.Instance.SetLogMessage("房间编号为 [" + roomId.ToString() + "] 准备开始游戏了~");
+                        }
+                        else
+                        {
+                            LogMessage.Instance.SetLogMessage("房间编号为 [" + roomId.ToString() + "] 现在还不能开始游戏~");
+                            LogMessage.Instance.SetLogMessage("为什么不能开始游戏呢?因为房间编号为 [" + roomId.ToString() + "] 的总玩家个数为 [" + tmpRoomInfo.UserInfos.Count + "]" + ",但是现在准备的玩家只有 [" + this.RoomReadyClientDict.Values.Count.ToString() + "].");
+                            return isStartGame;
+                        }
+                        break;
+                    case RoomGameServiceType.MahjongService:
+                        if (userCount == readyCount && userCount == Mahjong_MAX_PERSON_NUMBER)//如果准备的玩家个数 和 房间内的玩家个数 保持一致的话 则表示可以进行开始游戏了~
+                        {
+                            isStartGame = true;//设置可以开始游戏的标志位
+                            LogMessage.Instance.SetLogMessage("房间编号为 [" + roomId.ToString() + "] 准备开始游戏了~");
+                        }
+                        else
+                        {
+                            LogMessage.Instance.SetLogMessage("房间编号为 [" + roomId.ToString() + "] 现在还不能开始游戏~");
+                            LogMessage.Instance.SetLogMessage("为什么不能开始游戏呢?因为房间编号为 [" + roomId.ToString() + "] 的总玩家个数为 [" + tmpRoomInfo.UserInfos.Count + "]" + ",但是现在准备的玩家只有 [" + this.RoomReadyClientDict.Values.Count.ToString() + "].");
+                            return isStartGame;
+                        }
+                        break;
                 }
                 return isStartGame;//将标志位返回
             }

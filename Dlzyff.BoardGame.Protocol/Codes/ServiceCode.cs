@@ -15,6 +15,14 @@
         /// </summary>
         Passe_Response,
         /// <summary>
+        /// 帕斯获取最大值响应码
+        /// </summary>
+        Passe_GetMaxScoreResponse,
+        /// <summary>
+        /// 帕斯下注响应码
+        /// </summary>
+        Passe_BottomPourResponse,
+        /// <summary>
         /// 五轰六炸请求
         /// </summary>
         FivebombsWithSixbombs_Request,
@@ -34,5 +42,9 @@
         /// 帕斯消息广播响应
         /// </summary>
         Passe_BroadcastResponse,
+        /// <summary>
+        /// 五轰六炸消息广播响应
+        /// </summary>
+        FivebombsWithSixbombs_BroadcastResponse
     }
 }

@@ -9,11 +9,30 @@ namespace Dlzyff.BoardGame.Protocol.Dto
     [Serializable]
     public class RoomInfoDto
     {
+        /// <summary>
+        /// 房间游戏业务类别
+        /// </summary>
+        public enum RoomGameServiceType
+        {
+            /// <summary>
+            /// 帕斯业务
+            /// </summary>
+            PasseService = 0,
+            /// <summary>
+            /// 五轰六炸业务
+            /// </summary>
+            FivebombsWithSixbombsService = 1,
+            /// <summary>
+            /// 麻将业务
+            /// </summary>
+            MahjongService = 2
+        }
         private int _id;
         private int _enterCode;
         private string _name;
         private int _personNumber;
         private List<UserInfoDto> _users = new List<UserInfoDto>();
+        private RoomGameServiceType _serviceType;
 
         /// <summary>
         /// 房间编号
@@ -58,6 +77,21 @@ namespace Dlzyff.BoardGame.Protocol.Dto
         {
             get { return this._users; }
             set { this._users = value; }
+        }
+
+        /// <summary>
+        /// 房间游戏业务类别
+        /// </summary>
+        public RoomGameServiceType ServiceType
+        {
+            get
+            {
+                return this._serviceType;
+            }
+            set
+            {
+                this._serviceType = value;
+            }
         }
     }
 }

@@ -61,14 +61,15 @@ namespace Dlzyff.BoardGameServer.DataCache.Services
             //Console.WriteLine(this.resCards.Count);
             for (int cardIndex = 0; cardIndex < this.resCards.Count; cardIndex++)
             {
-                if (count == 5)
+                if (this.resCards[cardIndex] != string.Empty)
+                    Console.WriteLine(this.resCards[cardIndex]);
+                else
                 {
-                    Console.WriteLine();
-                    count = 0;
+                    count++;
                 }
-                Console.Write(this.resCards[cardIndex] + " ");
-                count++;
+
             }
+            Console.WriteLine("空值的个数：" + count.ToString());
         }
         #endregion
 

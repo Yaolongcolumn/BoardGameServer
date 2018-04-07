@@ -11,53 +11,77 @@ namespace Dlzyff.BoardGameServer.UnitTest
     {
         static void Main(string[] args)
         {
-            Random r = new Random(0);
+            #region 测试
+            //int index = 2;
+            //List<int> ints = new List<int>() { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            //int remainIndex = (ints.Count) - index;
+            //int[] intArray = new int[remainIndex];
+            //for (int i = remainIndex - 1; i >= 0; i--)
+            //{
+            //    intArray[i] = ints[i];
+            //}
+            //List<int> resList = new List<int>();
+            //for (int i = index + 1; i < ints.Count; i++)
+            //{
+            //    Console.WriteLine(ints[i]);
+            //}
 
-            #region 测试代码
-            //int enterCode1 = r.Next(10000, 40000);
-            //int enterCode2 = r.Next(10000, 40000);
-            //int enterCode3 = r.Next(10000, 40000);
-            //int enterCode4 = r.Next(10000, 40000);
-            //int enterCode5 = r.Next(10000, 40000);
-            //int enterCode6 = r.Next(10000, 40000);
-            //int enterCode7 = r.Next(10000, 40000);
-            //int enterCode8 = r.Next(10000, 40000);
-            //int enterCode9 = r.Next(10000, 40000);
-            //int enterCode10 = r.Next(10000, 40000);
-            //int enterCode11 = r.Next(10000, 40000);
-            //int enterCode12 = r.Next(10000, 40000);
-            //int enterCode13 = r.Next(10000, 40000);
-            //Console.WriteLine(enterCode1);
-            //Console.WriteLine(enterCode2);
-            //Console.WriteLine(enterCode3);
-            //Console.WriteLine(enterCode4);
-            //Console.WriteLine(enterCode5);
-            //Console.WriteLine(enterCode6);
-            //Console.WriteLine(enterCode7);
-            //Console.WriteLine(enterCode8);
-            //Console.WriteLine(enterCode9);
-            //Console.WriteLine(enterCode10);
-            //Console.WriteLine(enterCode11);
-            //Console.WriteLine(enterCode12);
-            //Console.WriteLine(enterCode13); 
+            //int[] intArray1 = new int[index + 1];
+
+            //for (int i = 0; i < intArray1.Length; i++)
+            //{
+            //    Console.WriteLine(intArray1[i]);
+            //}
+
             #endregion
 
-            int count = 0;
-            for (int index = 0; index < 101; index++)
-            {
-                if (count == 5)
-                {
-                    Console.WriteLine();
-                    count = 0;
-                }
-                else
-                {
-                    count++;
-                    int tmpEnterCode = r.Next(100000, 999999);
-                    Console.Write(tmpEnterCode + " ");
-                }
+            #region 第一次测试[整数测试]
+            //int int1 = 10;
+            //int int2 = 10;
+            //int[] ints = new int[5] { 10, 9, 10, 5, 6 };
+            //bool isSuccess = false;
+            //for (int i = 0; i < ints.Length; i++)
+            //{
+            //    int tmpNumber = ints[i];
+            //    int nextIndex = i + 1;
+            //    if (nextIndex > ints.Length - 1)
+            //        nextIndex = ints.Length - 1;
+            //    int tmpNextNumber = ints[nextIndex];
+            //    if (tmpNumber == int1 && tmpNextNumber == int2)
+            //    {
+            //        isSuccess = true;
+            //        break;
+            //    }
+            //}
+            // Console.WriteLine("是否找到了两个相同的值? " + isSuccess);
+            #endregion
 
+            #region 第二次测试[字符串测试]
+            string str1 = "HeartTwo";
+            string str2 = "HeartTwo";
+            string[] strs = new string[5] { "SpadeTwo", "SpadeTwo", "HeartTwo", "HeartTwo", "大王" };
+            bool isSuccess = false;
+            if (strs.Length >= 2)
+            {
+                for (int strIndex = 0; strIndex < strs.Length; strIndex++)
+                {
+                    string tmpStr = strs[strIndex];
+                    int nextIndex = strIndex + 1;
+                    if (nextIndex > strs.Length - 1)
+                        nextIndex = strs.Length - 1;
+                    string tmpNextStr = strs[nextIndex];
+                    if (tmpStr == str1 && tmpNextStr == str2)
+                    {
+                        isSuccess = true;
+                        break;
+                    }
+                }
+                Console.WriteLine("是否找到了两个相同的值? " + isSuccess);
             }
+            else
+                Console.WriteLine("值不足,不能进行判断~");
+            #endregion
+
             Console.ReadKey();
         }
     }

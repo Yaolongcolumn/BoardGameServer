@@ -60,7 +60,20 @@ namespace Dlzyff.BoardGameServer.LogicHandle
         public void OnDisconnect(ClientPeer clientPeer)
         {
             if (clientPeer != null)//如果要断开连接的客户端对象是可用状态
-                clientPeer.OnDisconnect();//直接断开连接即可
+            {
+                //Todo:一旦玩家断开了连接 可能要做断线重连功能
+                //Todo:目前先这样做,就是判断所有房间内存不存在这个玩家,如果有一个房间内存在这个玩家,那么直接将这个玩家从房间内移除即可,其实就是类似于,玩家离开房间的操作
+                //判断玩家在不在房间缓存类对象中的某一个房间内
+                if (this.roomCache.IsInRoom(clientPeer, out int roomId))//如果玩家在某一个房间内
+                {
+                    UserInfo userInfo = this.roomCache.GetUserInfoByClientPeer(clientPeer);//取出离开房间的玩家信息数据
+                    this.message.ChangeMessage(OperationCode.Room, (int)RoomCode.LeaveRoom_BroadcastResponse, userInfo.ClientIndex.ToString());//房间模块,离开房间响应,离开房间的玩家座位索引号
+                    this.roomCache.BroadcastMessageByRoomId(roomId, this.message);//广播消息
+                    RoomInfo leaveRoomInfo = this.roomCache.LeaveRoom(clientPeer, roomId);//使玩家离开房间,返回一个离开房间的房间信息对象
+                    //Todo:这里需要广播消息给房间内的每一个玩家,通知他们哪个玩家离开了房间,客户端需要更新界面的显示,也就是把离开的玩家的界面元素清除  
+                }
+                clientPeer.OnDisconnect();//无论玩家在不在房间内,直接断开玩家与服务端的连接即可
+            }
         }//断开连接
 
         /// <summary>
@@ -85,9 +98,7 @@ namespace Dlzyff.BoardGameServer.LogicHandle
                 case RoomCode.CreateRoom_Request:          //处理创建房间的业务请求
                     {
                         //创建房间
-                        /*
-                            这儿需要根据客户端传递过来的创建房间时的游戏类型数据,来进行一些相关的处理
-                         */
+                        //这儿需要根据客户端传递过来的创建房间时的游戏类型数据,来进行一些相关的处理
                         this.ProcessCreateRoomRequest(clientPeer, dataValue);
                     }
                     break;
@@ -221,9 +232,9 @@ namespace Dlzyff.BoardGameServer.LogicHandle
         {
             RoomInfo newRoom = this.roomCache.CreateRoom(clientPeer);//通过房间数据缓存对象创建并返回一个新的房间信息对象
             newRoom.PersonNumber++;//累加房间人数
-            int currentClientIndex = this.roomCache.GetRoomClientIndexByRoomId(clientPeer, newRoom.Id);
+            int currentClientIndex = this.roomCache.GetRoomClientIndexByRoomId(clientPeer, newRoom.Id);//记录当前玩家所在的房间座位号
 
-            #region 构建一个新的用户对象
+            #region 构建一个新的用户对象[后期从存储用户的用户数据服务器中取出对应的玩家数据]
             UserInfo userInfo = new UserInfo()
             {
                 UserName = clientPeer.ClientSocket.RemoteEndPoint.ToString(),
@@ -248,7 +259,8 @@ namespace Dlzyff.BoardGameServer.LogicHandle
                 Id = newRoom.Id,
                 EnterCode = newRoom.EnterCode,
                 Name = newRoom.Name,
-                PersonNumber = newRoom.PersonNumber
+                PersonNumber = newRoom.PersonNumber,
+                ServiceType = (RoomInfoDto.RoomGameServiceType)Enum.Parse(typeof(GameServiceTypeCode), createRoomData.ToString())
             };
 
             #region 循环取出当前房间内的用户数据
@@ -289,6 +301,7 @@ namespace Dlzyff.BoardGameServer.LogicHandle
             LogMessage.Instance.SetLogMessage(
                 string.Format("客户端对象唯一编号为 [ {0} ] 的用户创建了一个房间编号为 [ {1} ] 的新房间,这个房间的进入码为 [ {2} ]~", userInfo.Id.ToString(), newRoom.Id.ToString(), newRoom.EnterCode.ToString()));
             newRoom.RoomState = RoomState.Waiting;//将房间状态更改至等待中
+
             #region 创建房间后的 [洗牌] 和 [发牌] 阶段
             this.ProcessInitCreateRoomCardData(clientPeer, createRoomData, newRoom);//处理创建房间后需要做的一些初始化卡牌数据
             #endregion
@@ -296,29 +309,23 @@ namespace Dlzyff.BoardGameServer.LogicHandle
         }
 
         /// <summary>
-        /// 处理初始化创建房间后的卡牌数据
+        /// 处理创建房间后的初始化卡牌数据
         /// </summary>
-        /// <param name="clientPeer"><创建房间的客户端对象/param>
+        /// <param name="clientPeer">创建房间的客户端对象</param>
         /// <param name="createRoomData">创建房间时附带的数据</param>
         /// <param name="newRoom">创建好的房间信息数据</param>
         private void ProcessInitCreateRoomCardData(ClientPeer clientPeer, object createRoomData, RoomInfo newRoom)
         {
             if (createRoomData != null)
             {
-                //初始化卡牌数据
-                //  this.InitCardsData();
-                ////这里模拟创建房间后的一个洗牌过程
-                // this.ResetCards();
-                GameServiceTypeCode gameServiceTypeCode = (GameServiceTypeCode)Enum.Parse(typeof(GameServiceTypeCode), createRoomData.ToString());
-                switch (gameServiceTypeCode)
+                GameServiceTypeCode gameServiceTypeCode = (GameServiceTypeCode)Enum.Parse(typeof(GameServiceTypeCode), createRoomData.ToString());//转换客户端对象所创建的房间业务类别
+                switch (gameServiceTypeCode)//判断业务类别
                 {
-                    case GameServiceTypeCode.PasseService://帕斯业务初始发牌处理阶段
+                    case GameServiceTypeCode.PasseService://帕斯业务
                         {
                             LogMessage.Instance.SetLogMessage("处理帕斯游戏房间的初始化卡牌数据~");
-                            newRoom.ServiceType = RoomGameServiceType.PasseService;//设置当前创建房间的业务类型为帕斯
-                            /*
-                                    这里处理帕斯游戏的初始发牌过程
-                                */
+                            newRoom.ServiceType = RoomGameServiceType.PasseService;//设置房间的业务为帕斯
+                            // 这里处理帕斯游戏的初始发牌过程
                             this.passeServiceCache.InitCardsData();//通过帕斯业务数据缓存对象初始化卡牌数据
                             this.passeServiceCache.ResetCards();//通过帕斯业务数据缓存对象重置卡牌数据
                             this.passeServiceCache.AddClientPeer(clientPeer);//将客户端连接对象存储起来
@@ -326,30 +333,25 @@ namespace Dlzyff.BoardGameServer.LogicHandle
                             this.passeServiceCache.DisplayAllCards();
                         }
                         break;
-                    case GameServiceTypeCode.FivebombsWithSixbombsService://五轰六炸业务初始发牌处理阶段
+                    case GameServiceTypeCode.FivebombsWithSixbombsService://五轰六炸业务
                         {
                             LogMessage.Instance.SetLogMessage("处理五轰六炸游戏房间的初始化卡牌数据~");
-                            newRoom.ServiceType = RoomGameServiceType.FivebombsWithSixbombsService;//设置当前创建房间的业务类型为五轰六炸
-                            /*
-                                    这里处理五轰六炸游戏的初始发牌过程
-                                */
+                            newRoom.ServiceType = RoomGameServiceType.FivebombsWithSixbombsService;//设置当前房间的业务为五轰六炸
+                            // 这里处理五轰六炸游戏的初始发牌过程
                             this.fivebombsWithSixbombsServiceCache.InitCardsData();
                             this.fivebombsWithSixbombsServiceCache.ResetCards();
                             this.fivebombsWithSixbombsServiceCache.AddClientPeer(clientPeer);
                             this.fivebombsWithSixbombsServiceCache.AddRoomInfo(newRoom);
-                            this.passeServiceCache.DisplayAllCards();
+                            this.fivebombsWithSixbombsServiceCache.TouchCard(newRoom.Id);
                         }
                         break;
-                    case GameServiceTypeCode.MahjongService://麻将业务初始发牌处理阶段
+                    case GameServiceTypeCode.MahjongService://麻将业务
                         {
                             LogMessage.Instance.SetLogMessage("处理麻将游戏房间的初始化卡牌数据~");
-                            newRoom.ServiceType = RoomGameServiceType.MahjongService;//设置当前创建房间的业务类型为麻将
-                            /*
-                                    这里处理麻将游戏的初始发牌过程
-                                */
+                            newRoom.ServiceType = RoomGameServiceType.MahjongService;//设置当前房间的业务类型为麻将
+                            // 这里处理麻将游戏的初始发牌过程
                             this.mahjongServiceCache.InitCardsData();
                             this.mahjongServiceCache.ResetCards();
-                            this.mahjongServiceCache.DisplayAllCards();
                         }
                         break;
                 }
@@ -478,77 +480,102 @@ namespace Dlzyff.BoardGameServer.LogicHandle
         }
 
         /// <summary>
-        /// 处理校验房间人数
+        /// 校验房间人数是否达到满员状态
         /// </summary>
         /// <param name="clientPeer"></param>
         /// <param name="tmpRoom"></param>
         private void CheckPersonNumber(ClientPeer clientPeer, RoomInfo tmpRoom)
         {
-            if (tmpRoom.UserInfos.Count < RoomCache.MAX_PERSON_NUMBER)//房间未满员 等待其它客户端的加入
+            switch (tmpRoom.ServiceType)//判断房间业务类别
             {
-                tmpRoom.PersonNumber++;//累加房间人数
-                LogMessage.Instance.SetLogMessage(
-                             string.Format("客户端对象IP地址为 [ {0} ] 的用户加入了一个房间编号为 [ {1} ] 的房间,这个房间的进入码为 [ {2} ]~", clientPeer.ClientSocket.RemoteEndPoint.ToString(), tmpRoom.Id.ToString(), tmpRoom.EnterCode.ToString()));
-                #region 构建要传输的数据房间对象并把客户端需要的数据发送过去
-                int currentClientIndex = this.roomCache.GetRoomClientIndexByRoomId(clientPeer, tmpRoom.Id);
+                case RoomGameServiceType.PasseService://帕斯
+                    if (tmpRoom.UserInfos.Count >= RoomCache.Passe_MIN_PERSON_NUMBER && tmpRoom.UserInfos.Count < RoomCache.Passe_MAX_PERSON_NUMBER + 1)//房间未满员 等待其它客户端的加入
+                        this.EnterRoom(clientPeer, tmpRoom);
+                    else//处理 房间满员
+                        this.message.ChangeMessage(OperationCode.Message, (int)MessageCode.SingleMessage, "你要加入的房间已经满员~");
+                    break;
+                case RoomGameServiceType.FivebombsWithSixbombsService://五轰六炸
+                    Console.WriteLine("dawdawdaw");
+                    if (tmpRoom.UserInfos.Count < RoomCache.Five_MAX_PERSON_NUMBER + 1)//房间未满员 等待其它客户端的加入
+                        this.EnterRoom(clientPeer, tmpRoom);
+                    else//处理 房间满员
+                        this.message.ChangeMessage(OperationCode.Message, (int)MessageCode.SingleMessage, "你要加入的房间已经满员~");
+                    break;
+                case RoomGameServiceType.MahjongService://麻将
+                    if (tmpRoom.UserInfos.Count < RoomCache.Mahjong_MAX_PERSON_NUMBER + 1)//房间未满员 等待其它客户端的加入
+                        this.EnterRoom(clientPeer, tmpRoom);
+                    else//处理 房间满员
+                        this.message.ChangeMessage(OperationCode.Message, (int)MessageCode.SingleMessage, "你要加入的房间已经满员~");
+                    break;
+            }
+            //clientPeer.OnSendMessage(this.message); //根据需要再决定是否要发送消息
+        }
 
-                #region 通知客户端所在房间的座位号
-                //通知客户端 你所在的房间中的座位号是
-                clientPeer.OnSendMessage(new SocketMessage()
+        /// <summary>
+        /// 进入房间
+        /// </summary>
+        /// <param name="clientPeer">进入房间的客户端对象</param>
+        /// <param name="tmpRoom">要进入的房间</param>
+        private void EnterRoom(ClientPeer clientPeer, RoomInfo tmpRoom)
+        {
+            tmpRoom.PersonNumber++;//累加房间人数
+            LogMessage.Instance.SetLogMessage(
+                         string.Format("客户端对象IP地址为 [ {0} ] 的用户加入了一个房间编号为 [ {1} ] 的房间,这个房间的进入码为 [ {2} ]~", clientPeer.ClientSocket.RemoteEndPoint.ToString(), tmpRoom.Id.ToString(), tmpRoom.EnterCode.ToString()));
+            #region 构建要传输的数据房间对象并把客户端需要的数据发送过去
+            int currentClientIndex = this.roomCache.GetRoomClientIndexByRoomId(clientPeer, tmpRoom.Id);
+
+            #region 通知客户端所在房间的座位号
+            //通知客户端 你所在的房间中的座位号是
+            clientPeer.OnSendMessage(new SocketMessage()
+            {
+                OperationCode = OperationCode.Message,
+                SubOperationCode = (int)MessageCode.SingleMessage,
+                DataValue = currentClientIndex.ToString()
+            });
+            #endregion
+
+            //构建房间信息传输数据对象(用于服务端把房间数据传输给客户端)
+            RoomInfoDto roomInfoDto = new RoomInfoDto()
+            {
+                Id = tmpRoom.Id,
+                Name = tmpRoom.Name,
+                PersonNumber = tmpRoom.PersonNumber,
+                ServiceType = (RoomInfoDto.RoomGameServiceType)tmpRoom.ServiceType
+            };
+            //循环遍历房间内的客户端用户对象列表
+            for (int userIndex = 0; userIndex < tmpRoom.UserInfos.Count; userIndex++)
+            {
+                UserInfo userInfo = tmpRoom.UserInfos[userIndex];//取得当前循环遍历到的客户端用户对象数据
+                                                                 //构建一个用户信息传输数据添加至房间信息数据传输对象的用户列表中
+                roomInfoDto.Users.Add(new UserInfoDto()
                 {
-                    OperationCode = OperationCode.Message,
-                    SubOperationCode = (int)MessageCode.SingleMessage,
-                    DataValue = currentClientIndex.ToString()
+                    Id = userInfo.Id,
+                    UserName = userInfo.UserName,
+                    Money = userInfo.Money,
+                    ClientIndex = currentClientIndex,
+                    RoomId = tmpRoom.Id
                 });
-                #endregion
-
-                //构建房间信息传输数据对象(用于服务端把房间数据传输给客户端)
-                RoomInfoDto roomInfoDto = new RoomInfoDto()
-                {
-                    Id = tmpRoom.Id,
-                    Name = tmpRoom.Name,
-                    PersonNumber = tmpRoom.PersonNumber
-                };
-                //循环遍历房间内的客户端用户对象列表
-                for (int userIndex = 0; userIndex < tmpRoom.UserInfos.Count; userIndex++)
-                {
-                    UserInfo userInfo = tmpRoom.UserInfos[userIndex];//取得当前循环遍历到的客户端用户对象数据
-                    //构建一个用户信息传输数据添加至房间信息数据传输对象的用户列表中
-                    roomInfoDto.Users.Add(new UserInfoDto()
-                    {
-                        Id = userInfo.Id,
-                        UserName = userInfo.UserName,
-                        Money = userInfo.Money,
-                        ClientIndex = currentClientIndex,
-                        RoomId = tmpRoom.Id
-                    });
-                    LogMessage.Instance.SetLogMessage(userInfo.Id.ToString());
-                }
-                #endregion
-
-                #region 构造网络消息对象 广播给房间内的每一个客户端对象
-                //构造服务端发送给客户端的网络消息对象
-                this.message.ChangeMessage(OperationCode.Room, (int)RoomCode.JoinRoom_Response, roomInfoDto);
-                //通过房间数据缓存对象根据指定房间编号进行房间内的消息广播,将网络消息发送给每一个房间内的客户端用户对象
-                this.roomCache.BroadcastMessageByRoomId(tmpRoom.Id, this.message);
-                #endregion
-
-                #region 给房主广播一条空数据(没有实际作用,只是为了房主的数据同步工作,不会影响其他客户端对象)
-                RoomInfo tmpRoomInfo = this.roomCache.RoomIdRooms[tmpRoom.Id];//获取房间信息对象
-                List<ClientPeer> clients = this.roomCache.RoomClientsDict[tmpRoomInfo];//通过房间信息对象获取该房间内的客户端用户列表
-                if (clients != null)//如果不为空的情况下     
-                {
-                    //默认给房主发送一个null数据(之前不这样做,会导致房主的数据不进行同步处理,出现了Bug,之后这样做,竟然神奇地解决了)
-                    this.message.ChangeMessage(OperationCode.Service, (int)ServiceCode.Passe_Response, "null");
-                    clients[0].OnSendMessage(this.message);
-                }
-                #endregion
+                LogMessage.Instance.SetLogMessage(userInfo.Id.ToString());
             }
-            else//处理 房间满员
+            #endregion
+
+            #region 构造网络消息对象 广播给房间内的每一个客户端对象
+            //构造服务端发送给客户端的网络消息对象
+            this.message.ChangeMessage(OperationCode.Room, (int)RoomCode.JoinRoom_Response, roomInfoDto);
+            //通过房间数据缓存对象根据指定房间编号进行房间内的消息广播,将网络消息发送给每一个房间内的客户端用户对象
+            this.roomCache.BroadcastMessageByRoomId(tmpRoom.Id, this.message);
+            #endregion
+
+            #region 给房主广播一条空数据(没有实际作用,只是为了房主的数据同步工作,不会影响其他客户端对象)
+            RoomInfo tmpRoomInfo = this.roomCache.RoomIdRooms[tmpRoom.Id];//获取房间信息对象
+            List<ClientPeer> clients = this.roomCache.RoomClientsDict[tmpRoomInfo];//通过房间信息对象获取该房间内的客户端用户列表
+            if (clients != null)//如果不为空的情况下     
             {
-                this.message.ChangeMessage(OperationCode.Message, (int)MessageCode.SingleMessage, "你要加入的房间已经满员~");
-                clientPeer.OnSendMessage(this.message);
+                //默认给房主发送一个null数据(之前不这样做,会导致房主的数据不进行同步处理,出现了Bug,之后这样做,竟然神奇地解决了)
+                this.message.ChangeMessage(OperationCode.Service, (int)ServiceCode.Passe_Response, "null");
+                clients[0].OnSendMessage(this.message);
             }
+            #endregion
         }
         #endregion
 
@@ -568,7 +595,6 @@ namespace Dlzyff.BoardGameServer.LogicHandle
                 LogMessage.Instance.SetLogMessage("房间编号为 [ " + roomId + " ] 马上就要发牌了~ ");
                 LogMessage.Instance.SetLogMessage("房间编号为 [ " + roomId + " ] 可以开始游戏了~ ");
                 this.ProcessStartGame(clientPeer, this.roomCache.GetRoomInfoByRoomId(roomId));
-
             }
             #endregion
         }
@@ -582,7 +608,7 @@ namespace Dlzyff.BoardGameServer.LogicHandle
         /// <param name="roomId"></param>
         private void ProcessUserCancelreadyRequest(ClientPeer clientPeer, int roomId)
         {
-            this.roomCache.CancelReady(clientPeer, roomId);
+            this.roomCache.CancelReady(clientPeer, roomId);//处理玩家取消准备
         }
         #endregion
 
@@ -633,23 +659,14 @@ namespace Dlzyff.BoardGameServer.LogicHandle
             switch (tmpRoom.ServiceType)//判断开始游戏的房间的业务类别
             {
                 case RoomGameServiceType.PasseService://处理帕斯游戏业务的发牌
-                    {
-                        //Todo:清空房间内准备的玩家数据
-                        this.roomCache.InitRoomData(tmpRoom.Id);//这个初始化过程无非就是初始化一些每次房间游戏开始的时候不需要进行缓存的数据(比如说玩家准备)
-                        Thread.Sleep(2500);
-                        this.passeServiceCache.GetTouchCardByRoomId(tmpRoom.Id);//第一次发牌,需要给指定房间内的每一个客户端对象发一张底牌数据(根据指定房间编号分发底牌数据)
-                        Thread.Sleep(2500);
-                        this.passeServiceCache.GetClearCardByRoomId(tmpRoom.Id);//第二次发牌,需要给指定房间内的每一个客户端对象发一张明牌数据(根据指定房间编号分发明牌数据)
-                        Thread.Sleep(2500);
-                        this.passeServiceCache.CompleteUserScoreByRoomId(tmpRoom.Id, PasseServiceUserScoreCode.明牌);       //这里模拟比较分数大小
-                    }
+                    this.passeServiceCache.PasseGameInit(tmpRoom);//帕斯游戏初始化
                     break;
                 case RoomGameServiceType.FivebombsWithSixbombsService://处理五轰六炸游戏业务的发牌
                     {
                         //Todo:发牌(给每个玩家分发一组手牌)
 
-                        Thread.Sleep(2500);
-                        this.fivebombsWithSixbombsServiceCache.AssignUserCamp(tmpRoom.Id);//分配玩家阵营
+                        Thread.Sleep(1500);
+                        this.fivebombsWithSixbombsServiceCache.GiveCard(tmpRoom.Id);
                     }
                     break;
                 case RoomGameServiceType.MahjongService://处理麻将游戏业务的发牌   

@@ -6,9 +6,18 @@
     public enum PasseGameCode
     {
         /// <summary>
+        /// 显示跟请求
+        /// </summary>
+        DispalyFollow_Request,
+        /// <summary>
         /// 跟牌请求码
         /// </summary>
         Follow_Request,
+
+        /// <summary>
+        /// 跟牌响应码
+        /// </summary>
+        Follow_Response,
 
         /// <summary>
         /// 不跟牌请求码
@@ -38,6 +47,11 @@
         /// <summary>
         /// 下注响应码
         /// </summary>
+        BottomPour_Response,
+
+        /// <summary>
+        /// 下注响应码
+        /// </summary>
         BottomPour_BroadcastResponse,
 
         /// <summary>
@@ -58,6 +72,11 @@
         /// <summary>
         /// 帕斯游戏广播响应码
         /// </summary>
-        PasseGame_BroadcastResponse
+        PasseGame_BroadcastResponse,
+
+        /// <summary>
+        /// 显示最大分数广播响应码
+        /// </summary>
+        DisplayMaxScore_BroadcastResponse
     }
 }

@@ -39,9 +39,9 @@
             // btnStartServer
             // 
             this.btnStartServer.Font = new System.Drawing.Font("微软雅黑", 14F);
-            this.btnStartServer.Location = new System.Drawing.Point(906, 12);
+            this.btnStartServer.Location = new System.Drawing.Point(4, 3);
             this.btnStartServer.Name = "btnStartServer";
-            this.btnStartServer.Size = new System.Drawing.Size(202, 43);
+            this.btnStartServer.Size = new System.Drawing.Size(410, 43);
             this.btnStartServer.TabIndex = 0;
             this.btnStartServer.Text = "开启服务";
             this.btnStartServer.UseVisualStyleBackColor = true;
@@ -50,9 +50,9 @@
             // btnCloseServer
             // 
             this.btnCloseServer.Font = new System.Drawing.Font("微软雅黑", 14F);
-            this.btnCloseServer.Location = new System.Drawing.Point(906, 77);
+            this.btnCloseServer.Location = new System.Drawing.Point(4, 52);
             this.btnCloseServer.Name = "btnCloseServer";
-            this.btnCloseServer.Size = new System.Drawing.Size(202, 43);
+            this.btnCloseServer.Size = new System.Drawing.Size(410, 43);
             this.btnCloseServer.TabIndex = 1;
             this.btnCloseServer.Text = "关闭服务";
             this.btnCloseServer.UseVisualStyleBackColor = true;

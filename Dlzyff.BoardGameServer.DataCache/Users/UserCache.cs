@@ -45,9 +45,9 @@ namespace Dlzyff.BoardGameServer.DataCache.Users
         public int GetUserIdByUserInfo(UserInfo userInfo)
         {
             int userId = 0;
-            foreach (KeyValuePair<int,UserInfo> userItem in this.userIdUserDict)
+            foreach (KeyValuePair<int, UserInfo> userItem in this.userIdUserDict)
             {
-                if (userItem.Value==userInfo)
+                if (userItem.Value == userInfo)
                 {
                     userId = userItem.Key;
                     break;
@@ -76,17 +76,18 @@ namespace Dlzyff.BoardGameServer.DataCache.Users
         /// </summary>
         /// <param name="clientPeer"></param>
         /// <param name="money"></param>
-        public void SubMoney(ClientPeer clientPeer, int money)
+        public bool SubMoney(ClientPeer clientPeer, int money)
         {
             if (money <= 0)
-                return;
+                return false;
             else
             {
                 if (money > this.clientUserDict[clientPeer].Money)
-                    return;
+                    return false;
                 else
                 {
-                    this.clientUserDict[clientPeer].Money += money;
+                    this.clientUserDict[clientPeer].Money -= money;
+                    return true;
                 }
             }
         }
