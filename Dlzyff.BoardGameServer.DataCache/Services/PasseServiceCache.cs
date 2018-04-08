@@ -249,9 +249,6 @@ namespace Dlzyff.BoardGameServer.DataCache.Services
                                 if (clientPeer != null)
                                 {
                                     this.GetClearCardByRoomId(tmpRoomInfo.Id);
-                                    Thread.Sleep(2000);
-                                    //都发完牌之后 继续这一轮的分数比较
-                                    // this.CompleteUserScoreByRoomId(roomId, PasseServiceUserScoreCode.明牌);//继续比较玩家之间的分数
                                     break;
                                 }
                             }
@@ -386,7 +383,6 @@ namespace Dlzyff.BoardGameServer.DataCache.Services
                 //继续等待客户端玩家对象发起准备请求
                 //当所有人都准备之后,继续开始发牌操作
                 //又开始新一局的游戏
-                //this.Gameover(tmpRoomInfo, userInfo);
                 tmpRoomInfo.RoomState = RoomState.Ending;//设置房间状态为结束状态
                 if (tmpRoomInfo.RoomState == RoomState.Ending)
                 {
@@ -396,7 +392,12 @@ namespace Dlzyff.BoardGameServer.DataCache.Services
                     this.CompleteUserScoreByRoomId(tmpRoomInfo.Id, PasseServiceUserScoreCode.底明牌);
                     #endregion
 
+                    #region 告知客户端对象需要将之前的扑克牌数据清空
+                        
+                    #endregion
+
                     #region 给客户端重新发一局牌
+                    Thread.Sleep(2000);
                     this.PasseGameInit(tmpRoomInfo);
                     #endregion
                 }
@@ -519,14 +520,15 @@ namespace Dlzyff.BoardGameServer.DataCache.Services
                 }
                 else if (tmpRoomInfo.RoomState == RoomState.Ending && userScoreCode == PasseServiceUserScoreCode.底明牌)
                 {
-                    msg = "你获得了胜利";
-                    ClientPeer winClientpeer = this.roomCache.GetClientPeerByUserInfo(userInfo);
-                    this.message.ChangeMessage(OperationCode.GameResult, (int)GameResultCode.Game_Success_Response, msg);
-                    winClientpeer.OnSendMessage(this.message);
-                    //给其他玩家广播消息
-                    msg = "你失败了,座位号为 [" + userInfo.ClientIndex + "] 获得了游戏胜利~";
-                    this.message.ChangeMessage(OperationCode.GameResult, (int)GameResultCode.Game_Faild_Response, msg);
-                    this.roomCache.BroadCastMessageByExClient(winClientpeer, tmpRoomInfo.Id, this.message);
+                    //msg = "你获得了胜利";
+                    //ClientPeer winClientpeer = this.roomCache.GetClientPeerByUserInfo(userInfo);
+                    //this.message.ChangeMessage(OperationCode.GameResult, (int)GameResultCode.Game_Success_Response, msg);
+                    //winClientpeer.OnSendMessage(this.message);
+                    ////给其他玩家广播消息
+                    //msg = "你失败了,座位号为 [" + userInfo.ClientIndex + "] 获得了游戏胜利~";
+                    //this.message.ChangeMessage(OperationCode.GameResult, (int)GameResultCode.Game_Faild_Response, msg);
+                    //this.roomCache.BroadCastMessageByExClient(winClientpeer, tmpRoomInfo.Id, this.message);
+                    this.Gameover(tmpRoomInfo, userInfo);
 
                 }
             }

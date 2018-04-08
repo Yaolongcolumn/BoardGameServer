@@ -150,10 +150,9 @@ namespace Dlzyff.BoardGameServer.DataCache.Room
         public void InitRoomData(int roomId)
         {
             RoomInfo roomInfo = this.GetRoomInfoByRoomId(roomId);
+            roomInfo.RoomState = RoomState.Starting;
             if (roomInfo != null)
-            {
                 this.RoomReadyClientDict = new Dictionary<RoomInfo, Dictionary<ClientPeer, bool>>();
-            }
         }
         #endregion
 
